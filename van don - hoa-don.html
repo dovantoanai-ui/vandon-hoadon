@@ -1831,6 +1831,16 @@ function getVdUrl(){return ld('vd_gs_url','');}
 function getVdNv(){return ld('gDriver','')||ld('vd_nv_name','');}
 function vdGetStatus(k){return vdStatusMap[k]||'todo';}
 
+function openVdSetup(){
+  var box=document.getElementById('vdSetupBox');
+  if(!box)return;
+  var ui=document.getElementById('vdUrlInp');
+  if(ui)ui.value=getVdUrl();
+  var nvLabel=document.getElementById('vdNvLabel');
+  if(nvLabel)nvLabel.textContent=getVdNv()||'Chua chon';
+  box.style.display=box.style.display==='none'?'block':'none';
+}
+
 function goVanDon(){
   var today=vdTodayStr();
   vdStatusMap=ld('vd_status_'+today,{});
@@ -2080,6 +2090,7 @@ renderHome();
     <button class="tb-back" onclick="go('s-home')">←</button>
     <div style="flex:1"><div class="tb-ttl">Van don giao hang</div><div class="tb-sub" id="vdSub">Chua co du lieu</div></div>
     <button class="tb-btn" onclick="pullVanDon()" id="vdPullBtn">Tai lai</button>
+    <button class="tb-btn" onclick="openVdSetup()" style="background:rgba(255,255,255,.18);">Cai dat</button>
   </div>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--bd);">
     <div style="background:var(--sf);padding:9px 4px;text-align:center;"><div style="font-size:16px;font-weight:800;" id="vdTong">0</div><div style="font-size:9px;color:var(--mu);">Tong diem</div></div>
@@ -2095,7 +2106,10 @@ renderHome();
       <span id="vdNvLabel" style="font-weight:700;"></span>
       <span style="color:var(--bl);font-size:11px;cursor:pointer;margin-left:8px;" onclick="openDvPicker()">(Doi)</span>
     </div>
-    <button onclick="saveVdSetup()" style="width:100%;padding:12px;border-radius:9px;border:none;background:var(--gr);color:#fff;font-family:sans-serif;font-size:14px;font-weight:700;cursor:pointer;">Luu va tai du lieu</button>
+    <div style="display:flex;gap:8px;">
+      <button onclick="saveVdSetup()" style="flex:1;padding:12px;border-radius:9px;border:none;background:var(--gr);color:#fff;font-family:sans-serif;font-size:14px;font-weight:700;cursor:pointer;">Luu va tai</button>
+      <button onclick="document.getElementById('vdSetupBox').style.display='none'" style="padding:12px 16px;border-radius:9px;border:1.5px solid var(--bd2);background:var(--sf);color:var(--tx);font-family:sans-serif;font-size:14px;cursor:pointer;">Huy</button>
+    </div>
   </div>
   <div style="padding:0 10px;">
     <div class="vd-filter-bar">
