@@ -433,6 +433,50 @@ select.hd-finp{appearance:none;-webkit-appearance:none;background:transparent;cu
 .das-cancel{padding:12px;border-radius:10px;border:1.5px solid var(--bd2);background:var(--sf);color:var(--tx);font-family:sans-serif;font-size:14px;font-weight:600;cursor:pointer;width:calc(100% - 20px);margin:4px 10px 8px;}
 /* Update bottom nav from 4 to 5 cols when HD enabled */
 .bnav.cols5{grid-template-columns:repeat(5,1fr);}
+/* DA GIAO TAB */
+.done-card{background:var(--sf);border-radius:11px;border:1px solid var(--bd);margin:8px 10px 0;padding:11px 13px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh);}
+.done-card.has-hd{border-left:4px solid #2563eb;background:#f0f6ff;}
+.done-ico{width:32px;height:32px;border-radius:9px;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;font-weight:700;}
+.done-ico.has-hd{background:#dbeafe;color:#1e40af;}
+.done-info{flex:1;min-width:0;}
+.done-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.done-prods{font-size:11px;color:var(--mu);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.done-hd-info{font-size:11px;color:#1e40af;font-weight:700;margin-top:2px;}
+.done-btn-hd{padding:8px 12px;border-radius:8px;border:none;background:var(--gr);color:#fff;font-family:sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap;}
+.done-btn-hd.edit{background:#2563eb;}
+.done-btn-hd:active{opacity:.82;}
+.done-empty{text-align:center;padding:50px 20px;}
+.done-empty-ico{font-size:42px;margin-bottom:10px;}
+.done-empty-ttl{font-size:15px;font-weight:700;color:var(--mu);margin-bottom:5px;}
+.done-empty-sub{font-size:12px;color:var(--mu);line-height:1.5;}
+/* HD CATALOG (danh muc CH + SP trong Cai dat) */
+.hdc-sec{background:var(--sf);border-radius:13px;margin:12px 16px 0;overflow:hidden;border:1px solid var(--bd);}
+.hdc-hd{padding:12px 14px;background:#f8f7f5;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;}
+.hdc-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:var(--grb);color:var(--gr);}
+.hdc-ico.prod{background:var(--amb);color:var(--am);}
+.hdc-ttl{font-size:14px;font-weight:700;flex:1;}
+.hdc-cnt{font-size:11px;font-weight:700;padding:3px 9px;border-radius:12px;background:var(--bg);color:var(--mu);}
+.hdc-tabs{display:flex;background:var(--bg);border-bottom:1px solid var(--bd);}
+.hdc-tab{flex:1;padding:9px 6px;font-family:sans-serif;font-size:12px;font-weight:600;color:var(--mu);border:none;background:none;cursor:pointer;border-bottom:2.5px solid transparent;}
+.hdc-tab.on{color:var(--gr);border-bottom-color:var(--gr);background:var(--sf);}
+.hdc-panel{padding:11px 13px;}
+.hdc-panel.hide{display:none;}
+.hdc-row{display:flex;gap:7px;}
+.hdc-inp{flex:1;padding:10px 11px;border-radius:8px;border:1.5px solid var(--bd2);background:var(--bg);font-family:sans-serif;font-size:13px;color:var(--tx);outline:none;}
+.hdc-inp:focus{border-color:var(--gr);background:var(--sf);}
+.hdc-add{padding:10px 15px;border-radius:8px;border:none;background:var(--gr);color:#fff;font-family:sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+.hdc-bulk{width:100%;padding:10px 11px;border-radius:8px;border:1.5px solid var(--bd2);background:var(--bg);font-family:sans-serif;font-size:13px;color:var(--tx);outline:none;resize:vertical;min-height:90px;line-height:1.5;}
+.hdc-btns{display:flex;gap:7px;margin-top:8px;}
+.hdc-btn-go{flex:1;padding:10px;border-radius:8px;border:none;background:var(--gr);color:#fff;font-family:sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+.hdc-btn-clr{padding:10px 14px;border-radius:8px;border:1.5px solid var(--reb);background:var(--reb);color:var(--re);font-family:sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
+.hdc-btn-file{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:12px;border-radius:8px;border:1.5px dashed var(--bd2);background:var(--bg);color:var(--gr);font-family:sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+.hdc-file-inp{display:none;}
+.hdc-hint{font-size:11px;color:var(--mu);margin-top:6px;line-height:1.5;}
+.hdc-list{max-height:180px;overflow-y:auto;padding:6px 11px 11px;display:flex;flex-wrap:wrap;gap:5px;}
+.hdc-chip{display:inline-flex;align-items:center;gap:4px;padding:5px 8px 5px 10px;border-radius:14px;background:var(--bg);border:.5px solid var(--bd);font-size:12px;}
+.hdc-chip-del{color:var(--mu);font-size:14px;cursor:pointer;padding:0 4px;line-height:1;}
+.hdc-chip-del:hover{color:var(--re);}
+.hdc-empty{text-align:center;padding:15px;font-size:12px;color:var(--mu);font-style:italic;}
 </style>
 </head>
 <body>
@@ -483,7 +527,6 @@ select.hd-finp{appearance:none;-webkit-appearance:none;background:transparent;cu
     <div class="sync-txt" id="syncTxt">Dang tai van don...</div>
     <button class="sync-btn" onclick="pullMyVanDon()">Lam moi</button>
   </div>
-  <div id="urgentBanner" style="padding:0;"></div>
   <div class="stat-row">
     <div class="stat-box"><div class="stat-n" id="sTong" style="color:var(--gr);">0</div><div class="stat-l">Cua hang</div></div>
     <div class="stat-box"><div class="stat-n" id="sDone" style="color:var(--bl);">0</div><div class="stat-l">Da giao</div></div>
@@ -559,6 +602,85 @@ select.hd-finp{appearance:none;-webkit-appearance:none;background:transparent;cu
   </div>
   <div style="padding:0 16px;display:flex;flex-direction:column;gap:9px;">
     <button style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--gr);color:#fff;font-family:sans-serif;font-size:14px;font-weight:700;cursor:pointer;" onclick="saveSetupFromSet()">Luu cai dat</button>
+  </div>
+
+  <!-- == DANH MUC CUA HANG HD == -->
+  <div class="hdc-sec">
+    <div class="hdc-hd">
+      <div class="hdc-ico">&#127978;</div>
+      <div class="hdc-ttl">Cua hang (cho Hoa don)</div>
+      <span class="hdc-cnt" id="hdcStoreCnt">0</span>
+    </div>
+    <div class="hdc-tabs">
+      <button class="hdc-tab on" id="hdcStoreTab1" onclick="hdcSwTab('Store',1)">Nhap 1 ten</button>
+      <button class="hdc-tab" id="hdcStoreTab2" onclick="hdcSwTab('Store',2)">Dan danh sach</button>
+      <button class="hdc-tab" id="hdcStoreTab3" onclick="hdcSwTab('Store',3)">Import file</button>
+    </div>
+    <div class="hdc-panel" id="hdcStoreP1">
+      <div class="hdc-row">
+        <input class="hdc-inp" id="hdcStoreInp" type="text" placeholder="Ten cua hang..." onkeypress="if(event.key==='Enter')hdcAddOne('Store')">
+        <button class="hdc-add" onclick="hdcAddOne('Store')">Them</button>
+      </div>
+    </div>
+    <div class="hdc-panel hide" id="hdcStoreP2">
+      <textarea class="hdc-bulk" id="hdcStoreBulk" placeholder="Moi dong 1 ten cua hang:&#10;Vinmart Lang Ha&#10;Coop Mart Cau Giay&#10;..."></textarea>
+      <div class="hdc-btns">
+        <button class="hdc-btn-go" onclick="hdcBulkAdd('Store')">Them tat ca</button>
+        <button class="hdc-btn-clr" onclick="hdcClearAll('Store')">Xoa het</button>
+      </div>
+    </div>
+    <div class="hdc-panel hide" id="hdcStoreP3">
+      <button class="hdc-btn-file" onclick="document.getElementById('hdcStoreFile').click()">
+        <span style="font-size:16px;">&#128193;</span> Chon file Excel / CSV
+      </button>
+      <input type="file" id="hdcStoreFile" class="hdc-file-inp" accept=".xlsx,.xls,.csv" onchange="hdcImportFile('Store',this)">
+      <div class="hdc-hint">Cot A = ten cua hang. Tu dong bo header dong dau neu la "STT" / "Ten" / "Ma KH"...</div>
+      <div class="hdc-btns">
+        <button class="hdc-btn-clr" style="width:100%;" onclick="hdcClearAll('Store')">Xoa het</button>
+      </div>
+    </div>
+    <div class="hdc-list" id="hdcStoreList"></div>
+  </div>
+
+  <!-- == DANH MUC SAN PHAM HD == -->
+  <div class="hdc-sec">
+    <div class="hdc-hd">
+      <div class="hdc-ico prod">&#128230;</div>
+      <div class="hdc-ttl">San pham (cho Hoa don)</div>
+      <span class="hdc-cnt" id="hdcProdCnt">0</span>
+    </div>
+    <div class="hdc-tabs">
+      <button class="hdc-tab on" id="hdcProdTab1" onclick="hdcSwTab('Prod',1)">Nhap 1 ten</button>
+      <button class="hdc-tab" id="hdcProdTab2" onclick="hdcSwTab('Prod',2)">Dan danh sach</button>
+      <button class="hdc-tab" id="hdcProdTab3" onclick="hdcSwTab('Prod',3)">Import file</button>
+    </div>
+    <div class="hdc-panel" id="hdcProdP1">
+      <div class="hdc-row">
+        <input class="hdc-inp" id="hdcProdInp" type="text" placeholder="Ten san pham..." onkeypress="if(event.key==='Enter')hdcAddOne('Prod')">
+        <button class="hdc-add" onclick="hdcAddOne('Prod')">Them</button>
+      </div>
+    </div>
+    <div class="hdc-panel hide" id="hdcProdP2">
+      <textarea class="hdc-bulk" id="hdcProdBulk" placeholder="Moi dong 1 san pham:&#10;Nem chua&#10;Nem Thinh&#10;Cha que&#10;..."></textarea>
+      <div class="hdc-btns">
+        <button class="hdc-btn-go" onclick="hdcBulkAdd('Prod')">Them tat ca</button>
+        <button class="hdc-btn-clr" onclick="hdcClearAll('Prod')">Xoa het</button>
+      </div>
+    </div>
+    <div class="hdc-panel hide" id="hdcProdP3">
+      <button class="hdc-btn-file" onclick="document.getElementById('hdcProdFile').click()">
+        <span style="font-size:16px;">&#128193;</span> Chon file Excel / CSV
+      </button>
+      <input type="file" id="hdcProdFile" class="hdc-file-inp" accept=".xlsx,.xls,.csv" onchange="hdcImportFile('Prod',this)">
+      <div class="hdc-hint">Cot A = ten san pham.</div>
+      <div class="hdc-btns">
+        <button class="hdc-btn-clr" style="width:100%;" onclick="hdcClearAll('Prod')">Xoa het</button>
+      </div>
+    </div>
+    <div class="hdc-list" id="hdcProdList"></div>
+  </div>
+
+  <div style="padding:12px 16px 0;">
     <button style="width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--reb);background:var(--reb);color:var(--re);font-family:sans-serif;font-size:13px;font-weight:600;cursor:pointer;" onclick="resetApp()">Dat lai ung dung</button>
   </div>
   <div style="height:20px;"></div>
@@ -803,15 +925,27 @@ select.hd-finp{appearance:none;-webkit-appearance:none;background:transparent;cu
   </div>
 </div>
 
-<div class="bnav cols5" id="mainNav">
+<!-- == MAN DA GIAO == -->
+<div class="sc" id="s-done">
+  <div class="tb">
+    <div style="flex:1"><div class="tb-ttl">Da giao hom nay</div><div class="tb-sub" id="doneSub">0 cua hang</div></div>
+    <button class="tb-btn light" onclick="renderDoneList()">Lam moi</button>
+  </div>
+  <div style="padding:10px 14px;background:var(--sf);border-bottom:1px solid var(--bd);font-size:12px;color:var(--mu);line-height:1.5;">
+    Bam <b>+ HD</b> ben canh moi CH de tao hoa don nhanh voi SP da giao.
+  </div>
+  <div id="doneList" style="padding-top:4px;"></div>
+</div>
+
+<div class="bnav" id="mainNav" style="grid-template-columns:repeat(4,1fr);">
   <button class="bnav-btn on" id="bn-vd" onclick="goTab('vd')"><span class="bnav-ico">📋</span><span>Van don</span></button>
+  <button class="bnav-btn" id="bn-done" onclick="goTab('done')"><span class="bnav-ico">✓</span><span>Da giao</span></button>
   <button class="bnav-btn" id="bn-hd" onclick="goTab('hd')"><span class="bnav-ico">🧾</span><span>Hoa don</span></button>
-  <button class="bnav-btn" id="bn-route" onclick="goTab('route')"><span class="bnav-ico">🗺️</span><span>Tuyen</span></button>
-  <button class="bnav-btn" id="bn-saved" onclick="goTab('saved')"><span class="bnav-ico">⭐</span><span>Luu tuyen</span></button>
   <button class="bnav-btn" id="bn-set" onclick="goTab('set')"><span class="bnav-ico">⚙️</span><span>Cai dat</span></button>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // == STATE ==
 var GS_URL = localStorage.getItem('gh_gs_url') || '';
@@ -844,6 +978,70 @@ function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.c
 function esc(s){var t=document.createElement('div');t.textContent=String(s||'');return t.innerHTML;}
 function normName(s){return String(s||'').toLowerCase().replace(/\s+/g,' ').trim();}
 function fmtD(s){if(!s)return '';var p=(s+'').split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+// Rut gon ghi chu SP: bo chu "Thay date" va dau ngoac thua, chi giu phan "(con Nn)"
+// "Thay date (con 2n)" -> "con 2n"
+// "Thay date 01/05/2026" -> "01/05/2026"
+function cleanNote(note){
+  var s=String(note||'').trim();
+  if(!s)return '';
+  // Bo "Thay date" o dau (case-insensitive)
+  s=s.replace(/^\s*thay\s*date\s*/i,'').trim();
+  // Bo dau ngoac ngoai cung neu co: "(con 2n)" -> "con 2n"
+  s=s.replace(/^\(\s*(.*?)\s*\)$/,'$1').trim();
+  return s;
+}
+// Parse gio hen tu cot Thoi_gian_hen (Sheet)
+// Input co the la:
+//   "2026-04-17 18:30", "2026-04-17 18:3" (dang Sheet truc tiep)
+//   "2026-04-17T18:30:00.000Z" (ISO tu Apps Script)
+//   "Fri Apr 17 2026 18:30:00 GMT+0700" (Date toString)
+//   "18:30", "18:3", "18:30:00" (chi gio)
+//   So thuc tu Google Sheets (serial date) - VD: 45765.77083333333
+// Output: "HH:MM" hoac "" neu khong parse duoc
+function _parseGioHen(v){
+  if(v==null)return '';
+  var s=String(v).trim();
+  if(!s||s==='0')return '';
+
+  // Try parse so (Google Sheets serial date format)
+  var num=parseFloat(s);
+  if(!isNaN(num)&&num>0&&num<100000&&String(num)===s){
+    // Sheets date: phan thap phan = gio trong ngay
+    var frac=num-Math.floor(num);
+    var totalMin=Math.round(frac*24*60);
+    var h=Math.floor(totalMin/60)%24;
+    var mn=totalMin%60;
+    if(h>0||mn>0){
+      return String(h).padStart(2,'0')+':'+String(mn).padStart(2,'0');
+    }
+  }
+
+  // Try Date.parse (ISO, Date toString, etc.)
+  try{
+    var d=new Date(s);
+    if(!isNaN(d.getTime())&&d.getFullYear()>1990){
+      var h2=d.getHours(),m2=d.getMinutes();
+      if(h2>0||m2>0){
+        return String(h2).padStart(2,'0')+':'+String(m2).padStart(2,'0');
+      }
+    }
+  }catch(e){}
+
+  // Text match: lay phan gio sau cung
+  var parts=s.split(/[T\s]/);
+  var timePart=parts.length>1?parts[parts.length-1]:s;
+  // Bo timezone neu co: "18:30:00+07:00" -> "18:30:00"
+  timePart=timePart.replace(/[+Z].*$/,'').trim();
+  // Match H:M hoac HH:MM hoac HH:MM:SS
+  var m=timePart.match(/^(\d{1,2}):(\d{1,2})(?::\d{1,2}(?:\.\d+)?)?$/);
+  if(m){
+    var h3=parseInt(m[1]),mn3=parseInt(m[2]);
+    if(h3>=0&&h3<=23&&mn3>=0&&mn3<=59){
+      return String(h3).padStart(2,'0')+':'+String(mn3).padStart(2,'0');
+    }
+  }
+  return '';
+}
 
 // CRM state (phai sau ld)
 var crmStores = ld('gh_crm_stores', []);
@@ -871,9 +1069,7 @@ if(!GS_URL || !MY_NAME){
   document.getElementById('setNV').value = MY_NAME;
   if(deliveries.length){
     renderVdList();
-    renderMap();
     updateStats();
-    renderUrgentBanner();
   } else {
     pullMyVanDon();
   }
@@ -933,15 +1129,13 @@ function resetApp(){
 // == NAV ==
 function go(id){document.querySelectorAll('.sc').forEach(function(s){s.classList.remove('on');});document.getElementById(id).classList.add('on');window.scrollTo(0,0);}
 function goTab(tab){
-  var map={vd:'s-vd',hd:'s-hd',hdform:'s-hdform',map:'s-map',route:'s-route',saved:'s-saved',set:'s-set'};
+  var map={vd:'s-vd',done:'s-done',hd:'s-hd',hdform:'s-hdform',map:'s-map',route:'s-route',saved:'s-saved',set:'s-set'};
   go(map[tab]||'s-vd');
   document.querySelectorAll('.bnav-btn').forEach(function(b){b.classList.remove('on');});
-  var bnMap={vd:'bn-vd',hd:'bn-hd',route:'bn-route',saved:'bn-saved',set:'bn-set'};
+  var bnMap={vd:'bn-vd',done:'bn-done',hd:'bn-hd',set:'bn-set'};
   var bn=document.getElementById(bnMap[tab]||'bn-vd');if(bn)bn.classList.add('on');
-  if(tab==='map') renderMap();
-  if(tab==='route') computeSmartRoute();
-  if(tab==='saved') renderSavedRoutes();
   if(tab==='hd'){hdCurDate=hdCurDate||todayStr();renderHdList();}
+  if(tab==='done')renderDoneList();
 }
 
 // == SYNC ==
@@ -959,6 +1153,7 @@ function pullMyVanDon(){
   .then(function(r){return r.json();})
   .then(function(data){
     if(!data.ok) return setSyncStatus('red','Loi: '+(data.msg||''));
+    window._loggedVdKeys=false; // Reset de log lai
     var newRows = data.rows || [];
     // MERGE thay vi REPLACE: giu don cu, them/cap nhat don moi
     // Key duy nhat: tenCH + sanPham + ngay + lyDo (de phan biet cac SP khac nhau cua cung 1 CH)
@@ -999,9 +1194,7 @@ function pullMyVanDon(){
       setSyncStatus('green', msg+' · Tong '+deliveries.length+' diem');
     }
     renderVdList();
-    renderMap();
     updateStats();
-    renderUrgentBanner();
     toast(msg||'Da lam moi');
   })
   .catch(function(){setSyncStatus('red','Loi ket noi');toast('Khong ket noi duoc Sheet');})
@@ -1025,19 +1218,55 @@ function setSort(s){
 // == RENDER VAN DON ==
 function getStatus(key){return statusMap[key]||'todo';}
 
+// Tinh thoi gian con lai den gio hen, tra ve text "Con 2h 15p", "Qua 30p roi", "Sap den gio"
+function _timeLeftText(hhmm){
+  if(!hhmm)return '';
+  var now=new Date();
+  var p=hhmm.split(':');
+  if(p.length<2)return '';
+  var target=new Date();
+  target.setHours(parseInt(p[0])||0, parseInt(p[1])||0, 0, 0);
+  var diffMin=Math.round((target-now)/60000);
+  if(diffMin>0){
+    var h=Math.floor(diffMin/60);
+    var m=diffMin%60;
+    if(h>0)return 'Con '+h+'h'+(m?' '+m+'p':'')+' den gio giao';
+    if(m<=15)return 'SAP DEN GIO - '+m+' phut';
+    return 'Con '+m+' phut';
+  } else if(diffMin===0){
+    return 'DEN GIO GIAO!';
+  } else {
+    var late=-diffMin;
+    var lh=Math.floor(late/60),lm=late%60;
+    if(lh>0)return 'QUA '+lh+'h'+(lm?' '+lm+'p':'')+' ROI';
+    return 'QUA '+lm+' phut ROI';
+  }
+}
+
 function renderVdList(){
   // Group by store (moi cua hang 1 card, nhieu san pham)
   var storeMap = {};
   deliveries.forEach(function(r){
     var key = r.tenCH || r.stt;
+    // Detect hen gio: loaiGiao='hen' + parse thoiGianHen
+    var loaiGiaoVal=String(r.loaiGiao||r.Loai_giao||r.loai_giao||'').toLowerCase().trim();
+    var thoiGianHenRaw=r.thoiGianHen||r.Thoi_gian_hen||r.thoi_gian_hen||'';
+    var gioHen=_parseGioHen(thoiGianHenRaw);
+    // CHI coi la hen gio khi loaiGiao='hen' (khong fallback)
+    var isHen=loaiGiaoVal==='hen'&&!!gioHen;
     if(!storeMap[key]){
       storeMap[key] = {
         tenCH: r.tenCH||'?', stt: r.stt,
         quan: r.quan||'',
         mapUrl: r.mapUrl||'',
         ghiChuCH: r.ghiChuCH||'',
+        gioDay: (isHen&&gioHen)?gioHen:'',
         prods: []
       };
+    }
+    // Neu chua co gioDay truoc do thi lay tu row nay (ho tro truong hop row dau ko co, row sau co)
+    if(!storeMap[key].gioDay&&isHen&&gioHen){
+      storeMap[key].gioDay=gioHen;
     }
     storeMap[key].prods.push({
       name: r.sanPham||'',
@@ -1118,24 +1347,24 @@ function renderVdList(){
 
   // Group by quan - single column, moi quan 1 block doc
   if(curSort==='quan'){
-    // Tach don GAP/HEN ra group "UU TIEN" rieng (chua giao moi tinh)
-    var urgentKeys=[];
+    // Tach DON HEN GIO (co gio) va DON DAT (order khong hen gio) thanh 2 block rieng
+    // Don GAP (con 0-2n) se nam trong quan va len dau quan
+    var henGioKeys=[];
+    var donDatKeys=[];
     var otherKeys=[];
     stores.forEach(function(k){
       var s=storeMap[k];
       var isDone=getStatus(k)==='done';
       if(isDone){otherKeys.push(k);return;}
-      var hasGap=s.prods.some(function(p){
-        var m=String(p.ghiChuSP||'').match(/con\s*(\d+)n/i);
-        return p.lyDo==='date'&&m&&parseInt(m[1])<=2;
-      });
+      var hasHenGio=!!s.gioDay;
       var hasOrder=s.prods.some(function(p){return p.lyDo==='order';});
-      if(hasGap||hasOrder)urgentKeys.push(k);
+      if(hasHenGio)henGioKeys.push(k);      // Hen gio uu tien cao nhat
+      else if(hasOrder)donDatKeys.push(k);  // Don dat thuong
       else otherKeys.push(k);
     });
 
     // Ham tao block (dung chung cho UU TIEN va tung quan)
-    function createBlock(title,color,keys,isUrgent){
+    function createBlock(title,color,keys,isUrgent,subtitle){
       var doneCount=keys.filter(function(k){return getStatus(k)==='done';}).length;
       var pct=keys.length?Math.round(doneCount/keys.length*100):0;
       var block=document.createElement('div');
@@ -1146,7 +1375,7 @@ function renderVdList(){
       hd.innerHTML=
         '<div style="flex:1;">'+
           '<div style="font-size:14px;font-weight:800;color:'+color+';">'+icoHtml+esc(title)+'</div>'+
-          '<div style="font-size:11px;color:var(--mu);margin-top:2px;">'+doneCount+'/'+keys.length+' diem'+(isUrgent?' - CAN GIAO GAP':' da giao')+'</div>'+
+          '<div style="font-size:11px;color:var(--mu);margin-top:2px;">'+doneCount+'/'+keys.length+' diem'+(subtitle?' - '+subtitle:(isUrgent?' - CAN GIAO':' da giao'))+'</div>'+
         '</div>'+
         '<div style="text-align:right;">'+
           '<div style="font-size:20px;font-weight:800;color:'+color+';">'+pct+'%</div>'+
@@ -1160,15 +1389,40 @@ function renderVdList(){
       return block;
     }
 
-    // Render group UU TIEN truoc neu co don gap/hen
-    if(urgentKeys.length){
-      var urgentColor='#dc2626';
-      var urgBlock=createBlock('UU TIEN - Giao gap',urgentColor,urgentKeys,true);
-      var urgList=document.createElement('div');
-      urgList.style.cssText='background:var(--sf);';
-      urgentKeys.forEach(function(k,si){renderQuanRow(urgList,k,storeMap[k],si,urgentColor);});
-      urgBlock.appendChild(urgList);
-      el.appendChild(urgBlock);
+    // Render block HEN GIO truoc (uu tien cao nhat - mau do)
+    if(henGioKeys.length){
+      // Sort theo gio tang dan
+      henGioKeys.sort(function(a,b){
+        var sa=storeMap[a],sb=storeMap[b];
+        return sa.gioDay.localeCompare(sb.gioDay);
+      });
+      // Tim don gan nhat chua giao de hien countdown
+      var nearestGio=null;
+      henGioKeys.forEach(function(k){
+        if(getStatus(k)!=='done'&&storeMap[k].gioDay){
+          if(!nearestGio||storeMap[k].gioDay<nearestGio)nearestGio=storeMap[k].gioDay;
+        }
+      });
+      var henColor='#dc2626';
+      var subTxt=nearestGio?_timeLeftText(nearestGio):'';
+      var henBlock=createBlock('HEN GIO - Giao dung gio',henColor,henGioKeys,true,subTxt);
+      var henList=document.createElement('div');
+      henList.style.cssText='background:var(--sf);';
+      henGioKeys.forEach(function(k,si){renderQuanRow(henList,k,storeMap[k],si,henColor);});
+      henBlock.appendChild(henList);
+      el.appendChild(henBlock);
+    }
+
+    // Render block DON DAT (mau cam)
+    if(donDatKeys.length){
+      donDatKeys.sort(function(a,b){return (storeMap[a].stt||0)-(storeMap[b].stt||0);});
+      var datColor='#d97706';
+      var datBlock=createBlock('DON DAT - Giao dung so luong',datColor,donDatKeys,true);
+      var datList=document.createElement('div');
+      datList.style.cssText='background:var(--sf);';
+      donDatKeys.forEach(function(k,si){renderQuanRow(datList,k,storeMap[k],si,datColor);});
+      datBlock.appendChild(datList);
+      el.appendChild(datBlock);
     }
 
     // Render cac quan con lai (otherKeys)
@@ -1184,6 +1438,33 @@ function renderVdList(){
     quanList.forEach(function(quan,qi){
       var color=quanColors[qi%quanColors.length];
       var keys=quanGroups[quan];
+      // Sort trong quan:
+      // 1. Chua giao len truoc, da giao xuong cuoi
+      // 2. Don gap (con 0-2n) len dau quan, ngay it hon len dau hon
+      // 3. Con lai sort theo stt
+      function getGapDays(k){
+        var s=storeMap[k];
+        var min=99;
+        s.prods.forEach(function(p){
+          if(p.lyDo!=='date')return;
+          var m=String(p.ghiChuSP||'').match(/con\s*(\d+)n/i);
+          if(m){var d=parseInt(m[1]);if(d<min)min=d;}
+        });
+        return min;
+      }
+      keys.sort(function(a,b){
+        var da_done=getStatus(a)==='done',db_done=getStatus(b)==='done';
+        if(da_done&&!db_done)return 1;
+        if(!da_done&&db_done)return -1;
+        // Ca 2 cung status - sort theo gap
+        var ga=getGapDays(a),gb=getGapDays(b);
+        var aGap=ga<=2,bGap=gb<=2;
+        if(aGap&&!bGap)return -1;
+        if(!aGap&&bGap)return 1;
+        if(aGap&&bGap)return ga-gb; // Con 0n len dau hon con 2n
+        // Khong gap - theo stt
+        return (storeMap[a].stt||0)-(storeMap[b].stt||0);
+      });
       var block=createBlock(quan,color,keys,false);
       // Store rows
       var list=document.createElement('div');
@@ -1212,8 +1493,13 @@ function renderQuanRow(list, k, s, si, color){
   var totalNo=s.prods.reduce(function(acc,p){return acc+(parseFloat(p.thuNo)||0);},0);
 
   var prodTxt=s.prods.map(function(p){
-    var note=String(p.ghiChuSP||'');
-    return (p.name||p.sanPham||'')+(note?' ('+note+')':'');
+    var note=cleanNote(p.ghiChuSP);
+    var qtyTxt='';
+    // Don dat: hien so luong de NV biet can giao bao nhieu
+    if(p.lyDo==='order'&&p.qty&&parseFloat(p.qty)>0){
+      qtyTxt=' x'+p.qty;
+    }
+    return (p.name||p.sanPham||'')+qtyTxt+(note?' ('+note+')':'');
   }).filter(Boolean).join(' . ');
 
   var row=document.createElement('div');
@@ -1228,10 +1514,12 @@ function renderQuanRow(list, k, s, si, color){
   info.onclick=(function(sk){return function(){openCrm(sk);};})(k);
   var rowIco='';
   if(!isDone){
-    if(isGap) rowIco='<span class="urg-ico" style="font-size:13px;margin-right:3px;">\u{1F6A8}</span>';
-    else if(isOrder) rowIco='<span class="urg-ico" style="font-size:12px;margin-right:3px;">\u23F0</span>';
+    if(s.gioDay) rowIco='<span class="urg-ico" style="font-size:12px;margin-right:3px;">\u23F0</span>';
+    else if(isGap) rowIco='<span class="urg-ico" style="font-size:13px;margin-right:3px;">\u{1F6A8}</span>';
+    else if(isOrder) rowIco='<span class="urg-ico" style="font-size:12px;margin-right:3px;">\u{1F4CC}</span>';
   }
-  info.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+rowIco+esc(s.tenCH)+' <span style="font-size:10px;color:var(--bl);">&#9432;</span></div>'+
+  var gioHtml=(s.gioDay&&!isDone)?' <span style="font-size:10px;color:#d97706;font-weight:800;background:#fef3c7;padding:1px 5px;border-radius:5px;">&#9200; '+esc(s.gioDay)+'</span>':'';
+  info.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+rowIco+esc(s.tenCH)+gioHtml+' <span style="font-size:10px;color:var(--bl);">&#9432;</span></div>'+
     (prodTxt?'<div style="font-size:10px;color:var(--mu);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(prodTxt)+'</div>':'')+
     (hasThuNo?'<div style="font-size:10px;font-weight:700;color:var(--re);margin-top:2px;">Thu no: '+Number(totalNo).toLocaleString('vi-VN')+'d</div>':'');
 
@@ -1297,12 +1585,20 @@ function renderCard(container, key, store, idx, accentColor){
   var prodsHtml='';
   store.prods.forEach(function(p){
     var tagColor=p.lyDo==='date'?'background:var(--reb);color:var(--re);':'background:var(--grb);color:var(--gr);';
-    var tagTxt=p.lyDo==='date'?'Thay date':'Co don';
+    var tagTxt=p.lyDo==='date'?'Thay date':p.lyDo==='order'?'Don dat':'Co don';
+    var cleanedNote=cleanNote(p.ghiChuSP);
+    // Qty: chi hien khi >0. Don dat (order) - tô mau cam noi bat, Thay date - xanh la
+    var qtyHtml='';
+    if(p.qty&&parseFloat(p.qty)>0){
+      var qtyColor=p.lyDo==='order'?'#d97706':'var(--gr)';
+      var qtyBg=p.lyDo==='order'?'#fef3c7':'transparent';
+      qtyHtml='<div class="prod-qty" style="color:'+qtyColor+';background:'+qtyBg+';padding:'+(p.lyDo==='order'?'3px 8px':'0')+';border-radius:6px;">x'+p.qty+'</div>';
+    }
     prodsHtml+='<div class="prod-line">'+
       '<span class="prod-tag" style="'+tagColor+'">'+tagTxt+'</span>'+
       '<div style="flex:1;"><div class="prod-nm">'+esc(p.name)+'</div>'+
-      (p.ghiChuSP?'<div class="prod-nt">'+esc(p.ghiChuSP)+'</div>':'')+
-      '</div><div class="prod-qty">x'+p.qty+'</div></div>';
+      (cleanedNote?'<div class="prod-nt">'+esc(cleanedNote)+'</div>':'')+
+      '</div>'+qtyHtml+'</div>';
   });
 
   // Quan
@@ -1310,13 +1606,16 @@ function renderCard(container, key, store, idx, accentColor){
 
   // Icon canh bao nhap nhay cho don gap/hen
   var urgentIco='';
-  if(isGapCard) urgentIco='<span class="urg-ico" title="Don GAP - uu tien">&#128680;</span>';
-  else if(isOrderCard) urgentIco='<span class="urg-ico" title="Don co hen">&#9200;</span>';
+  var hasHenGio=!isDone&&!!store.gioDay;
+  if(hasHenGio) urgentIco='<span class="urg-ico" title="Don HEN GIO">&#9200;</span>';
+  else if(isGapCard) urgentIco='<span class="urg-ico" title="Don GAP - uu tien">&#128680;</span>';
+  else if(isOrderCard) urgentIco='<span class="urg-ico" title="Don dat">&#128204;</span>';
+  var gioHtml=hasHenGio?' <span style="font-size:11px;color:#d97706;font-weight:800;background:#fef3c7;padding:1px 6px;border-radius:5px;margin-left:4px;">&#9200; '+esc(store.gioDay)+'</span>':'';
 
   card.innerHTML=
     '<div class="dl-hd">'+
       '<div class="dl-num'+(isDone?' done':'')+'">'+idx+'</div>'+
-      '<div style="flex:1;cursor:pointer;" onclick="openCrm(\''+esc(store.tenCH).replace(/'/g,"\\'")+'\')"><div class="dl-store">'+urgentIco+esc(store.tenCH)+' <span style="font-size:11px;color:var(--bl);font-weight:600;">&#9432;</span></div></div>'+
+      '<div style="flex:1;cursor:pointer;" onclick="openCrm(\''+esc(store.tenCH).replace(/'/g,"\\'")+'\')"><div class="dl-store">'+urgentIco+esc(store.tenCH)+gioHtml+' <span style="font-size:11px;color:var(--bl);font-weight:600;">&#9432;</span></div></div>'+
       (store.mapUrl?'<a href="'+store.mapUrl+'" target="_blank" class="map-link">&#128207; Ban do</a>':'')+
     '</div>'+
     '<div class="dl-body">'+prodsHtml+'</div>';
@@ -1542,7 +1841,8 @@ function renderMap(){
     bounds.push(ll);
 
     var prodTxt=s.prods.slice(0,3).map(function(r){
-      return esc(r.sanPham||'')+(r.ghiChuSP?' <span style="color:#9ca3af;">('+esc(r.ghiChuSP)+')</span>':'');
+      var cn=cleanNote(r.ghiChuSP);
+      return esc(r.sanPham||'')+(cn?' <span style="color:#9ca3af;">('+esc(cn)+')</span>':'');
     }).join('<br>');
     var tb={order:'#dbeafe',gap:'#fee2e2',sap:'#fef3c7',done:'#dcfce7'}[t]||'#f4f4f4';
     var tl={order:'Đơn đặt',gap:'Gấp!',sap:'Sắp hết',done:'Đã giao'}[t]||'';
@@ -1586,7 +1886,6 @@ window.onload=function(){
   document.getElementById('setNV').value=MY_NAME||'';
   // Goi banner neu co data san trong localStorage
   if(deliveries.length){
-    renderUrgentBanner();
     updateStats();
     renderVdList();
   }
@@ -1633,7 +1932,7 @@ function renderUrgentBanner(){
     var hdIn='<div class="urg-hd" style="background:#dc2626;"><div class="urg-pulse"></div><span class="urg-ttl">Don gap — giao ngay hom nay</span><span class="urg-cnt">'+gap.length+' don</span></div>';
     gap.slice(0,3).forEach(function(k){
       var s=storeMap2[k];
-      var prodTxt=s.prods.slice(0,2).map(function(p){return (p.sanPham||'')+(p.ghiChuSP?' ('+p.ghiChuSP+')':'');}).join(' · ');
+      var prodTxt=s.prods.slice(0,2).map(function(p){var cn=cleanNote(p.ghiChuSP);return (p.sanPham||'')+(cn?' ('+cn+')':'');}).join(' · ');
       hdIn+='<div class="urg-item">'+
         '<div class="urg-stripe" style="background:#dc2626;"></div>'+
         '<div class="urg-info">'+
@@ -1663,7 +1962,7 @@ function renderUrgentBanner(){
       var prodTxt=s.prods.map(function(p){
         return (p.sanPham||'')+(p.soLuong&&p.soLuong>0?' x'+p.soLuong:'');
       }).filter(Boolean).join(' · ');
-      var ghiChu=s.prods.map(function(p){return p.ghiChuSP||'';}).filter(Boolean).join(', ');
+      var ghiChu=s.prods.map(function(p){return cleanNote(p.ghiChuSP);}).filter(Boolean).join(', ');
       hdIn2+='<div class="urg-item hen" onclick="goToVdAll()" style="cursor:pointer;">'+
         '<div class="urg-stripe" style="background:#d97706;"></div>'+
         '<div class="urg-info">'+
@@ -1800,7 +2099,8 @@ function computeSmartRoute(){
       var lbl=selSt===2?'✓':selSt===1?String(rtSelOrder.indexOf(pi)+1):String(i+1);
 
       var prodTxt=s.prods.slice(0,3).map(function(r){
-        return esc(r.sanPham||'')+(r.ghiChuSP?' ('+esc(r.ghiChuSP)+')':'');
+        var cn=cleanNote(r.ghiChuSP);
+        return esc(r.sanPham||'')+(cn?' ('+esc(cn)+')':'');
       }).join('<br>');
       var tb={order:'#dbeafe',gap:'#fee2e2',sap:'#fef3c7',done:'#dcfce7'}[type]||'#f4f4f4';
       var tl={order:'Đơn đặt',gap:'Gấp!',sap:'Sắp hết',done:'Đã giao'}[type]||'';
@@ -2779,8 +3079,107 @@ function pushCrmToSheet(store){
   }).catch(function(){toast('Luu local xong, dong bo Sheet loi');});
 }
 // ==============================
-// == HOA DON MODULE ==
+// == DA GIAO TAB ==
 // ==============================
+// Hien thi cac CH da danh dau giao xong, cho phep tao HD nhanh
+function renderDoneList(){
+  var el=document.getElementById('doneList');
+  if(!el)return;
+
+  // Lay cac CH da duoc danh dau 'done' trong status map
+  var doneKeys=Object.keys(statusMap).filter(function(k){return statusMap[k]==='done';});
+
+  // Build storeMap tu deliveries (dung cho van don hom nay)
+  var storeMap={};
+  deliveries.forEach(function(r){
+    var key=r.tenCH||r.stt;
+    if(!storeMap[key]){
+      storeMap[key]={tenCH:r.tenCH||'?',stt:r.stt,prods:[]};
+    }
+    storeMap[key].prods.push({
+      name:r.sanPham||'',
+      qty:r.soLuong||0,
+      lyDo:r.lyDo||'',
+      ghiChuSP:r.ghiChuSP||''
+    });
+  });
+
+  // Filter: chi lay CH co trong van don hom nay
+  var validKeys=doneKeys.filter(function(k){return storeMap[k];});
+
+  // Update subtitle
+  var subEl=document.getElementById('doneSub');
+  if(subEl)subEl.textContent=validKeys.length+' cua hang';
+
+  if(!validKeys.length){
+    el.innerHTML='<div class="done-empty">'+
+      '<div class="done-empty-ico">&#10003;</div>'+
+      '<div class="done-empty-ttl">Chua co CH nao da giao</div>'+
+      '<div class="done-empty-sub">Quay lai tab Van don, bam nut <b>Giao</b> o CH da giao xong.<br>Cac CH se xuat hien o day de tao HD nhanh.</div>'+
+    '</div>';
+    return;
+  }
+
+  // Tim HD da co voi ngay hien tai (de biet CH nao da tao HD)
+  var today=todayStr();
+  var invs=getInvs(today);
+  var invByStore={};
+  invs.forEach(function(inv){
+    if(inv.store)invByStore[normName(inv.store)]=inv;
+  });
+
+  el.innerHTML='';
+  validKeys.forEach(function(k){
+    var s=storeMap[k];
+    var inv=invByStore[normName(s.tenCH)];
+    var hasHd=!!inv;
+
+    var prodTxt=s.prods.map(function(p){
+      var qtyPart=(p.qty&&parseFloat(p.qty)>0)?' x'+p.qty:'';
+      return (p.name||'')+qtyPart;
+    }).filter(Boolean).join(' . ');
+
+    var card=document.createElement('div');
+    card.className='done-card'+(hasHd?' has-hd':'');
+
+    var ico='<div class="done-ico'+(hasHd?' has-hd':'')+'">'+(hasHd?'&#129534;':'&#10003;')+'</div>';
+    var info='<div class="done-info">'+
+      '<div class="done-name">'+esc(s.tenCH)+'</div>'+
+      (prodTxt?'<div class="done-prods">'+esc(prodTxt)+'</div>':'')+
+      (hasHd?'<div class="done-hd-info">&#9989; Da co HD: '+Math.round(inv.total||0).toLocaleString('vi-VN')+'d</div>':'')+
+      '</div>';
+
+    var btnTxt=hasHd?'Sua HD':'+ HD';
+    var btnCls=hasHd?'done-btn-hd edit':'done-btn-hd';
+    var btn='<button class="'+btnCls+'" data-key="'+esc(k).replace(/"/g,'&quot;')+'" data-inv="'+(hasHd?esc(inv.id):'')+'">'+btnTxt+'</button>';
+
+    card.innerHTML=ico+info+btn;
+    el.appendChild(card);
+  });
+
+  // Bind click events
+  el.querySelectorAll('.done-btn-hd').forEach(function(btn){
+    btn.onclick=function(){
+      var invId=this.getAttribute('data-inv');
+      var key=this.getAttribute('data-key');
+      if(invId){
+        // Sua HD
+        openEditInv(invId);
+      } else {
+        // Tao HD moi voi prefill
+        var s=storeMap[key];
+        if(s){
+          var prods=s.prods.map(function(p){
+            return {name:p.name||'',qty:parseFloat(p.qty)||0,price:0};
+          }).filter(function(p){return p.name;});
+          openNewInv(s.tenCH,prods);
+        }
+      }
+    };
+  });
+}
+
+
 
 // -- STORAGE HELPERS --
 function getInvs(dt){return ld('gh_inv_'+dt,[]);}
@@ -2975,7 +3374,6 @@ function renderInvRows(){
     var d=invRd[r];
     var row=document.createElement('div');
     row.className='hd-prow';
-    // Header: tên SP + nút xóa
     var statusHtml=statuses.map(function(st){
       var cls=clsMap[st];
       return '<button class="hd-st '+cls+(d.status===st?' on':'')+'" data-r="'+r+'" data-s="'+st+'">'+st+'</button>';
@@ -2984,7 +3382,10 @@ function renderInvRows(){
     row.innerHTML=
       '<div class="hd-prow-h">'+
         '<span class="hd-pnum">'+(i+1)+'.</span>'+
-        '<div class="hd-pname"><input class="hd-sdi" placeholder="Ten san pham..." value="'+esc(d.name||'')+'" data-r="'+r+'" data-f="name" style="width:100%;font-size:14px;padding:6px 0;border-bottom:.5px solid var(--bd);"></div>'+
+        '<div class="hd-pname" style="position:relative;">'+
+          '<input class="hd-sdi pname-inp" placeholder="Ten san pham..." value="'+esc(d.name||'')+'" data-r="'+r+'" data-f="name" autocomplete="off" style="width:100%;font-size:14px;padding:6px 0;border-bottom:.5px solid var(--bd);">'+
+          '<div class="hd-sdl pname-dropdown" id="pname_dd_'+r+'" style="position:absolute;left:0;right:0;top:100%;margin-top:2px;"></div>'+
+        '</div>'+
         (invRows.length>1?'<button class="hd-pdel" data-r="'+r+'" data-del="1">&times;</button>':'')+
       '</div>'+
       '<div class="hd-prow-b">'+
@@ -3000,7 +3401,22 @@ function renderInvRows(){
     inp.oninput=function(){
       var r=this.getAttribute('data-r'),f=this.getAttribute('data-f');
       if(invRd[r]){invRd[r][f]=this.value;calcInvTotal();}
+      // Neu la input ten SP, render dropdown
+      if(f==='name')_renderProdSuggestion(r,this.value);
     };
+    if(inp.getAttribute('data-f')==='name'){
+      inp.onfocus=function(){
+        var r=this.getAttribute('data-r');
+        _renderProdSuggestion(r,this.value);
+      };
+      inp.onblur=function(){
+        var r=this.getAttribute('data-r');
+        setTimeout(function(){
+          var dd=document.getElementById('pname_dd_'+r);
+          if(dd)dd.classList.remove('on');
+        },200);
+      };
+    }
   });
   c.querySelectorAll('button[data-del]').forEach(function(btn){
     btn.onclick=function(){removeInvRow(this.getAttribute('data-r'));};
@@ -3011,6 +3427,35 @@ function renderInvRows(){
       if(invRd[r]){invRd[r].status=s;renderInvRows();}
     };
   });
+}
+
+// Render goi y ten SP tu catalog
+function _renderProdSuggestion(rowId, query){
+  var dd=document.getElementById('pname_dd_'+rowId);
+  if(!dd)return;
+  var all=hdcGet('Prod');
+  if(!all.length){dd.classList.remove('on');return;}
+  var qn=(query||'').toLowerCase().trim();
+  var filtered=qn?all.filter(function(v){return v.toLowerCase().indexOf(qn)>=0;}):all;
+  if(!filtered.length){dd.classList.remove('on');return;}
+  dd.innerHTML='';
+  filtered.slice(0,15).forEach(function(v){
+    var opt=document.createElement('div');
+    opt.className='hd-sdo';
+    opt.textContent=v;
+    opt.onmousedown=function(e){
+      e.preventDefault();
+      if(invRd[rowId]){
+        invRd[rowId].name=v;
+        // Cap nhat input value
+        var inp=document.querySelector('input[data-r="'+rowId+'"][data-f="name"]');
+        if(inp)inp.value=v;
+      }
+      dd.classList.remove('on');
+    };
+    dd.appendChild(opt);
+  });
+  dd.classList.add('on');
 }
 
 function calcInvTotal(){
@@ -3037,10 +3482,14 @@ function setupStoreDropdown(){
   var inp=document.getElementById('fStore');
   var list=document.getElementById('sdStore');
   if(!inp||!list)return;
-  // Lay danh sach CH: tu van don hom nay + CRM
+  // Lay danh sach CH: Catalog HD (uu tien) + van don hom nay + CRM
   function getAllStores(){
     var set={};
+    // Catalog HD (nguoi dung tu them trong Cai dat)
+    hdcGet('Store').forEach(function(v){if(v)set[v]=1;});
+    // Van don hom nay
     deliveries.forEach(function(d){if(d.tenCH)set[d.tenCH]=1;});
+    // CRM
     crmStores.forEach(function(s){if(s.name)set[s.name]=1;});
     return Object.keys(set).sort();
   }
@@ -3049,7 +3498,7 @@ function setupStoreDropdown(){
     var qn=(q||'').toLowerCase().trim();
     var filtered=qn?all.filter(function(v){return v.toLowerCase().indexOf(qn)>=0;}):all;
     list.innerHTML='';
-    filtered.slice(0,20).forEach(function(v){
+    filtered.slice(0,25).forEach(function(v){
       var opt=document.createElement('div');
       opt.className='hd-sdo';
       opt.textContent=v;
@@ -3340,6 +3789,159 @@ function renderHistory(){
     el.appendChild(card);
   });
 }
+// ==============================
+// == HD CATALOG (Danh muc CH + SP) ==
+// ==============================
+function hdcGet(type){return ld('hd_catalog_'+type,[]);}
+function hdcSave(type,arr){sv('hd_catalog_'+type,arr);}
+
+// Chuyen tab trong section
+function hdcSwTab(type,n){
+  [1,2,3].forEach(function(i){
+    var tab=document.getElementById('hdc'+type+'Tab'+i);
+    var panel=document.getElementById('hdc'+type+'P'+i);
+    if(tab)tab.classList.toggle('on',i===n);
+    if(panel)panel.classList.toggle('hide',i!==n);
+  });
+}
+
+// Them 1 item
+function hdcAddOne(type){
+  var inp=document.getElementById('hdc'+type+'Inp');
+  var v=(inp.value||'').trim();
+  if(!v)return;
+  var a=hdcGet(type);
+  if(a.indexOf(v)>=0){toast('Da ton tai: '+v);return;}
+  a.push(v);
+  hdcSave(type,a);
+  inp.value='';
+  renderHdCatalog();
+  toast('Da them: '+v);
+}
+
+// Them hang loat
+function hdcBulkAdd(type){
+  var ta=document.getElementById('hdc'+type+'Bulk');
+  var lines=(ta.value||'').split('\n').map(function(s){return s.trim();}).filter(Boolean);
+  if(!lines.length){toast('Chua co du lieu');return;}
+  var a=hdcGet(type);
+  var added=0,dup=0;
+  lines.forEach(function(v){
+    if(a.indexOf(v)<0){a.push(v);added++;}
+    else dup++;
+  });
+  hdcSave(type,a);
+  ta.value='';
+  renderHdCatalog();
+  toast('Them '+added+' moi'+(dup?', bo qua '+dup+' trung':''));
+}
+
+// Xoa het
+function hdcClearAll(type){
+  var label=type==='Store'?'cua hang':'san pham';
+  if(!confirm('Xoa toan bo danh muc '+label+'?'))return;
+  hdcSave(type,[]);
+  renderHdCatalog();
+  toast('Da xoa het '+label);
+}
+
+// Xoa 1 item
+function hdcRemove(type,idx){
+  var a=hdcGet(type);
+  a.splice(idx,1);
+  hdcSave(type,a);
+  renderHdCatalog();
+}
+
+// Import file Excel/CSV
+function hdcImportFile(type,inp){
+  var file=inp.files[0];
+  if(!file){return;}
+  if(typeof XLSX==='undefined'){
+    toast('Thu vien chua tai xong, thu lai sau...');
+    inp.value='';
+    return;
+  }
+  var reader=new FileReader();
+  var isCSV=file.name.toLowerCase().endsWith('.csv');
+  reader.onload=function(e){
+    var names=[];
+    try{
+      if(isCSV){
+        var raw=e.target.result;
+        if(raw.charCodeAt(0)===65279)raw=raw.slice(1);
+        raw=raw.replace(/\r/g,'');
+        names=raw.split('\n').map(function(r){
+          return r.split(',')[0].replace(/^"|"$/g,'').trim();
+        }).filter(Boolean);
+      } else {
+        var wb=XLSX.read(e.target.result,{type:'array'});
+        var ws=wb.Sheets[wb.SheetNames[0]];
+        var data=XLSX.utils.sheet_to_json(ws,{header:1});
+        names=data.map(function(r){return String((r&&r[0])||'').trim();}).filter(Boolean);
+      }
+      // Bo header phobien va so thuan tuy
+      var headerPat=/^(stt|ten|name|no|header|cua hang|san pham|ma kt|ma kh|ten khach hang)$/i;
+      if(names.length&&headerPat.test(names[0]))names=names.slice(1);
+      names=names.filter(function(v){return v&&!/^\d+$/.test(v);});
+      if(!names.length){toast('Khong tim thay du lieu');return;}
+      // Loai trung voi danh sach hien co
+      var a=hdcGet(type);
+      var added=0,dup=0;
+      names.forEach(function(v){
+        if(a.indexOf(v)<0){a.push(v);added++;}
+        else dup++;
+      });
+      hdcSave(type,a);
+      renderHdCatalog();
+      toast('Import '+added+' moi tu file'+(dup?', bo qua '+dup+' trung':''));
+    }catch(err){
+      toast('Loi doc file: '+err.message);
+    }
+  };
+  if(isCSV)reader.readAsText(file,'utf-8');
+  else reader.readAsArrayBuffer(file);
+  inp.value='';
+}
+
+// Render chips + counters
+function renderHdCatalog(){
+  ['Store','Prod'].forEach(function(type){
+    var a=hdcGet(type);
+    var cntEl=document.getElementById('hdc'+type+'Cnt');
+    var listEl=document.getElementById('hdc'+type+'List');
+    if(cntEl)cntEl.textContent=a.length;
+    if(!listEl)return;
+    if(!a.length){
+      listEl.innerHTML='<div class="hdc-empty">Chua co item nao</div>';
+      return;
+    }
+    listEl.innerHTML='';
+    a.forEach(function(v,i){
+      var chip=document.createElement('div');
+      chip.className='hdc-chip';
+      chip.innerHTML='<span>'+esc(v)+'</span><span class="hdc-chip-del" data-type="'+type+'" data-idx="'+i+'">&times;</span>';
+      listEl.appendChild(chip);
+    });
+    listEl.querySelectorAll('.hdc-chip-del').forEach(function(btn){
+      btn.onclick=function(){
+        var t=this.getAttribute('data-type');
+        var idx=parseInt(this.getAttribute('data-idx'));
+        hdcRemove(t,idx);
+      };
+    });
+  });
+}
+
+// Render catalog khi vao tab Cai dat
+var _origGoTab=goTab;
+goTab=function(tab){
+  _origGoTab(tab);
+  if(tab==='set')renderHdCatalog();
+};
+
+// Render ngay khi load app
+setTimeout(function(){renderHdCatalog();},100);
 </script>
 </body>
 </html>
