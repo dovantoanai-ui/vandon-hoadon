@@ -126,11 +126,48 @@ body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--tx
 .lf-popup-inner .lf-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:7px;display:inline-block;margin-bottom:5px;}
 .lf-popup-inner .lf-prods{font-size:10px;color:#57534e;line-height:1.5;}
 .lf-popup-inner .lf-hint{font-size:10px;color:#a8a29e;margin-top:5px;}
-@keyframes blinkCard{0%,100%{border-color:var(--re);}50%{border-color:transparent;}}
-@keyframes blinkAmber{0%,100%{border-color:#d97706;}50%{border-color:transparent;}}
-.vd-urgent{animation:blinkCard 1s infinite;border-left:3px solid var(--re) !important;background:#fff9f9 !important;}
-.vd-order{border-left:3px solid #1976d2 !important;background:#f0f6ff !important;}
-/* URGENT BANNER */
+/* URGENT - Nhap nhay chi o icon va chu ten CH, KHONG nhap nhay ca o */
+@keyframes urgentIconPulse{
+  0%,100%{transform:scale(1);opacity:1;}
+  50%{transform:scale(1.2);opacity:.6;}
+}
+@keyframes urgentTextPulse{
+  0%,100%{color:#dc2626;}
+  50%{color:#991b1b;}
+}
+@keyframes orderTextPulse{
+  0%,100%{color:#d97706;}
+  50%{color:#b45309;}
+}
+/* URGENT CARD - Vien do tinh, ko nhap nhay nen */
+.vd-urgent{
+  border:2px solid #dc2626 !important;
+  border-left:5px solid #dc2626 !important;
+  background:#fff9f9 !important;
+  box-shadow:0 2px 10px rgba(220,38,38,.15) !important;
+}
+.vd-urgent .dl-store{
+  animation:urgentTextPulse 1.2s infinite;
+}
+.vd-urgent .urg-ico{
+  display:inline-block;animation:urgentIconPulse 1s infinite;
+  margin-right:5px;font-size:15px;
+}
+/* ORDER CARD - Vien cam tinh */
+.vd-order{
+  border:2px solid #d97706 !important;
+  border-left:5px solid #d97706 !important;
+  background:#fff9ed !important;
+  box-shadow:0 2px 10px rgba(217,119,6,.12) !important;
+}
+.vd-order .dl-store{
+  animation:orderTextPulse 1.5s infinite;
+}
+.vd-order .urg-ico{
+  display:inline-block;animation:urgentIconPulse 1.3s infinite;
+  margin-right:5px;font-size:14px;
+}
+/* URGENT BANNER - Nhap nhay nen */
 .urg-banner{border-radius:12px;overflow:hidden;margin:8px 14px;}
 .urg-hd{padding:9px 13px;display:flex;align-items:center;gap:8px;}
 .urg-pulse{width:9px;height:9px;border-radius:50%;background:#fff;animation:upulse 1.2s infinite;}
@@ -922,13 +959,50 @@ function pullMyVanDon(){
   .then(function(r){return r.json();})
   .then(function(data){
     if(!data.ok) return setSyncStatus('red','Loi: '+(data.msg||''));
-    deliveries = data.rows || [];
+    var newRows = data.rows || [];
+    // MERGE thay vi REPLACE: giu don cu, them/cap nhat don moi
+    // Key duy nhat: tenCH + sanPham + ngay + lyDo (de phan biet cac SP khac nhau cua cung 1 CH)
+    function makeKey(r){
+      return (r.tenCH||'')+'||'+(r.sanPham||'')+'||'+(r.ngay||'')+'||'+(r.lyDo||'');
+    }
+    var merged = {};
+    // Giu don cu truoc
+    (deliveries||[]).forEach(function(r){
+      merged[makeKey(r)] = r;
+    });
+    // Dem so don moi thuc su
+    var addedCount = 0, updatedCount = 0;
+    newRows.forEach(function(r){
+      var k = makeKey(r);
+      if(merged[k]){
+        // Cap nhat thong tin neu co thay doi (so luong, ghi chu...)
+        var old = merged[k];
+        var changed = (old.soLuong!==r.soLuong) || (old.ghiChuSP!==r.ghiChuSP) || (old.ghiChuCH!==r.ghiChuCH) || (old.thuNo!==r.thuNo) || (old.mapUrl!==r.mapUrl);
+        if(changed) updatedCount++;
+      } else {
+        addedCount++;
+        // Danh dau don moi de hieu thi highlight tam thoi
+        r._isNew = Date.now();
+      }
+      merged[k] = r;
+    });
+    deliveries = Object.values(merged);
     sv('gh_data_'+today, deliveries);
-    setSyncStatus('green','Da tai '+deliveries.length+' diem giao');
+    // Thong bao ket qua merge
+    var msg='';
+    if(addedCount===0 && updatedCount===0){
+      msg='Khong co don moi';
+      setSyncStatus('green','Da tai, khong co don moi ('+deliveries.length+' diem)');
+    } else {
+      if(addedCount>0) msg+='Them '+addedCount+' don moi';
+      if(updatedCount>0) msg+=(msg?', ':'')+'cap nhat '+updatedCount+' don';
+      setSyncStatus('green', msg+' · Tong '+deliveries.length+' diem');
+    }
     renderVdList();
     renderMap();
     updateStats();
-    toast('Tai xong '+deliveries.length+' diem!');
+    renderUrgentBanner();
+    toast(msg||'Da lam moi');
   })
   .catch(function(){setSyncStatus('red','Loi ket noi');toast('Khong ket noi duoc Sheet');})
   .finally(function(){document.getElementById('btnRefresh').textContent='Tai lai';});
@@ -986,35 +1060,43 @@ function renderVdList(){
     return true;
   });
 
-  // Sort urgent/order len dau (truoc ca sort quan/thu tu)
+  // Tinh priority cho tung store (GAP = 0, ORDER = 1, binh thuong = 2)
+  // Priority cao hon (so nho hon) = hien len dau
+  function getPriority(s){
+    var prods=s.prods||[];
+    var hasGap=prods.some(function(p){
+      var m=String(p.ghiChuSP||'').match(/con\s*(\d+)n/i);
+      return p.lyDo==='date'&&m&&parseInt(m[1])<=2;
+    });
+    var hasOrder=prods.some(function(p){return p.lyDo==='order';});
+    if(hasGap) return 0;
+    if(hasOrder) return 1;
+    return 2;
+  }
+
+  // SORT TONG HOP: theo thu tu uu tien
+  // 1. Da giao -> cuoi cung
+  // 2. Don GAP -> len dau tien (chua giao)
+  // 3. Don HEN -> len thu hai (chua giao)
+  // 4. Trong cung nhom priority thi sort theo quan/stt
   stores.sort(function(a,b){
     var sa=storeMap[a],sb=storeMap[b];
     var isDoneA=getStatus(a)==='done',isDoneB=getStatus(b)==='done';
-    if(isDoneA&&!isDoneB)return 1;if(!isDoneA&&isDoneB)return -1;
-    // Tinh priority
-    function pri(s){
-      var prods=s.prods||[];
-      var hasGap=prods.some(function(p){
-        var m=String(p.ghiChuSP||'').match(/con\s*(\d+)n/i);
-        return p.lyDo==='date'&&m&&parseInt(m[1])<=2;
-      });
-      var hasOrder=prods.some(function(p){return p.lyDo==='order';});
-      if(hasGap)return 0;if(hasOrder)return 1;return 2;
+    // Da giao xuong cuoi
+    if(isDoneA&&!isDoneB)return 1;
+    if(!isDoneA&&isDoneB)return -1;
+    // Neu ca 2 deu chua giao hoac deu da giao: so sanh priority
+    if(!isDoneA&&!isDoneB){
+      var pa=getPriority(sa),pb=getPriority(sb);
+      if(pa!==pb)return pa-pb;
     }
-    return pri(sa)-pri(sb);
+    // Cung priority - sort theo quan/stt
+    if(curSort==='quan'){
+      var qa=sa.quan||'ZZZ',qb=sb.quan||'ZZZ';
+      if(qa!==qb)return qa.localeCompare(qb,'vi');
+    }
+    return (sa.stt||0)-(sb.stt||0);
   });
-
-  // Sort theo quan/thu tu (giu urgent len dau trong moi nhom)
-  if(curSort==='quan'){
-    stores.sort(function(a,b){
-      var qa = storeMap[a].quan||'ZZZ';
-      var qb = storeMap[b].quan||'ZZZ';
-      if(qa!==qb) return qa.localeCompare(qb,'vi');
-      return (storeMap[a].stt||0)-(storeMap[b].stt||0);
-    });
-  } else {
-    stores.sort(function(a,b){return (storeMap[a].stt||0)-(storeMap[b].stt||0);});
-  }
 
   // Update nav
   document.getElementById('vdTtl').textContent = MY_NAME ? 'Van don - '+MY_NAME : 'Van don cua toi';
@@ -1036,110 +1118,144 @@ function renderVdList(){
 
   // Group by quan - single column, moi quan 1 block doc
   if(curSort==='quan'){
-    var quanGroups={};
+    // Tach don GAP/HEN ra group "UU TIEN" rieng (chua giao moi tinh)
+    var urgentKeys=[];
+    var otherKeys=[];
     stores.forEach(function(k){
-      var q=storeMap[k].quan||'Khac';
-      if(!quanGroups[q])quanGroups[q]=[];
-      quanGroups[q].push(k);
+      var s=storeMap[k];
+      var isDone=getStatus(k)==='done';
+      if(isDone){otherKeys.push(k);return;}
+      var hasGap=s.prods.some(function(p){
+        var m=String(p.ghiChuSP||'').match(/con\s*(\d+)n/i);
+        return p.lyDo==='date'&&m&&parseInt(m[1])<=2;
+      });
+      var hasOrder=s.prods.some(function(p){return p.lyDo==='order';});
+      if(hasGap||hasOrder)urgentKeys.push(k);
+      else otherKeys.push(k);
     });
-    var quanColors=['#1a6b35','#1976d2','#d97706','#7c3aed','#dc2626','#0891b2','#059669'];
-    var quanList=Object.keys(quanGroups).sort(function(a,b){return a.localeCompare(b,'vi');});
 
-    quanList.forEach(function(quan,qi){
-      var color=quanColors[qi%quanColors.length];
-      var keys=quanGroups[quan];
+    // Ham tao block (dung chung cho UU TIEN va tung quan)
+    function createBlock(title,color,keys,isUrgent){
       var doneCount=keys.filter(function(k){return getStatus(k)==='done';}).length;
       var pct=keys.length?Math.round(doneCount/keys.length*100):0;
-
-      // Block header
       var block=document.createElement('div');
-      block.style.cssText='margin:0 14px 12px;border-radius:12px;overflow:hidden;border:1px solid '+color+'44;';
-
-      // Header
+      block.style.cssText='margin:0 14px 12px;border-radius:12px;overflow:hidden;border:'+(isUrgent?'2px':'1px')+' solid '+color+(isUrgent?'':'44')+';'+(isUrgent?'box-shadow:0 4px 16px '+color+'33;':'');
       var hd=document.createElement('div');
-      hd.style.cssText='display:flex;align-items:center;gap:10px;padding:11px 13px 9px;border-left:4px solid '+color+';background:var(--sf);';
+      hd.style.cssText='display:flex;align-items:center;gap:10px;padding:11px 13px 9px;border-left:4px solid '+color+';background:'+(isUrgent?color+'11':'var(--sf)')+';';
+      var icoHtml=isUrgent?'<span style="display:inline-block;animation:urgentIconPulse 1s infinite;font-size:17px;margin-right:6px;">&#128680;</span>':'';
       hd.innerHTML=
         '<div style="flex:1;">'+
-          '<div style="font-size:14px;font-weight:700;color:'+color+';">'+esc(quan)+'</div>'+
-          '<div style="font-size:11px;color:var(--mu);margin-top:2px;">'+doneCount+'/'+keys.length+' diem da giao</div>'+
+          '<div style="font-size:14px;font-weight:800;color:'+color+';">'+icoHtml+esc(title)+'</div>'+
+          '<div style="font-size:11px;color:var(--mu);margin-top:2px;">'+doneCount+'/'+keys.length+' diem'+(isUrgent?' - CAN GIAO GAP':' da giao')+'</div>'+
         '</div>'+
         '<div style="text-align:right;">'+
           '<div style="font-size:20px;font-weight:800;color:'+color+';">'+pct+'%</div>'+
           '<div style="font-size:9px;color:var(--mu);">hoan thanh</div>'+
         '</div>';
       block.appendChild(hd);
-
-      // Progress bar
       var prog=document.createElement('div');
       prog.style.cssText='height:3px;background:var(--bd);';
       prog.innerHTML='<div style="height:100%;width:'+pct+'%;background:'+color+';transition:width .4s;"></div>';
       block.appendChild(prog);
+      return block;
+    }
 
+    // Render group UU TIEN truoc neu co don gap/hen
+    if(urgentKeys.length){
+      var urgentColor='#dc2626';
+      var urgBlock=createBlock('UU TIEN - Giao gap',urgentColor,urgentKeys,true);
+      var urgList=document.createElement('div');
+      urgList.style.cssText='background:var(--sf);';
+      urgentKeys.forEach(function(k,si){renderQuanRow(urgList,k,storeMap[k],si,urgentColor);});
+      urgBlock.appendChild(urgList);
+      el.appendChild(urgBlock);
+    }
+
+    // Render cac quan con lai (otherKeys)
+    var quanGroups={};
+    otherKeys.forEach(function(k){
+      var q=storeMap[k].quan||'Khac';
+      if(!quanGroups[q])quanGroups[q]=[];
+      quanGroups[q].push(k);
+    });
+    var quanColors=['#1a6b35','#1976d2','#d97706','#7c3aed','#0891b2','#059669','#e11d48'];
+    var quanList=Object.keys(quanGroups).sort(function(a,b){return a.localeCompare(b,'vi');});
+
+    quanList.forEach(function(quan,qi){
+      var color=quanColors[qi%quanColors.length];
+      var keys=quanGroups[quan];
+      var block=createBlock(quan,color,keys,false);
       // Store rows
       var list=document.createElement('div');
       list.style.cssText='background:var(--sf);';
-      keys.forEach(function(k,si){
-        var s=storeMap[k];
-        var st=getStatus(k);
-        var isDone=st==='done';
-        var isFail=st==='fail';
-        var isUrgent=s.prods.some(function(p){return p.lyDo==='date';});
-        var isOrder=s.prods.some(function(p){return p.lyDo==='order';});
-        var hasThuNo=s.prods.some(function(p){return p.thuNo>0;});
-        var totalNo=s.prods.reduce(function(acc,p){return acc+(parseFloat(p.thuNo)||0);},0);
-
-        var prodTxt=s.prods.map(function(p){
-          var note=String(p.ghiChuSP||'');
-          return (p.name||p.sanPham||'')+(note?' ('+note+')':'');
-        }).filter(Boolean).join(' · ');
-
-        var row=document.createElement('div');
-        row.style.cssText='display:flex;align-items:center;gap:9px;padding:10px 13px;border-top:.5px solid var(--bd);'+(isDone?'opacity:.45;':'');
-
-        // So thu tu
-        var num=document.createElement('div');
-        num.style.cssText='width:24px;height:24px;border-radius:50%;background:'+(isDone?'#888':color)+';color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
-        num.textContent=isDone?'✓':(si+1);
-
-        // Info
-        var info=document.createElement('div');
-        info.style.cssText='flex:1;min-width:0;cursor:pointer;';
-        info.onclick=(function(sk){return function(){openCrm(sk);};})(k);
-        info.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(s.tenCH)+' <span style="font-size:10px;color:var(--bl);">&#9432;</span></div>'+
-          (prodTxt?'<div style="font-size:10px;color:var(--mu);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(prodTxt)+'</div>':'')+
-          (hasThuNo?'<div style="font-size:10px;font-weight:700;color:var(--re);margin-top:2px;">Thu no: '+Number(totalNo).toLocaleString('vi-VN')+'d</div>':'');
-
-        // Tag
-        var tag=document.createElement('span');
-        var tagBg=isDone?'var(--bg)':isFail?'var(--reb)':isUrgent?'var(--reb)':isOrder?'#dbeafe':'var(--amb)';
-        var tagColor=isDone?'var(--mu)':isFail?'var(--re)':isUrgent?'var(--re)':isOrder?'#1e40af':'var(--am)';
-        tag.style.cssText='font-size:9px;font-weight:700;padding:3px 8px;border-radius:8px;flex-shrink:0;background:'+tagBg+';color:'+tagColor+';';
-        tag.textContent=isDone?'Xong':isFail?'K.giao':isUrgent?'Gap!':isOrder?'Don':'Sap';
-
-        // Map link
-        var actions=document.createElement('div');
-        actions.style.cssText='display:flex;gap:5px;align-items:center;flex-shrink:0;';
-        if(s.mapUrl){
-          var ml=document.createElement('a');ml.href=s.mapUrl;ml.target='_blank';
-          ml.style.cssText='padding:5px 8px;border-radius:7px;background:var(--blb);color:var(--bl);font-size:10px;font-weight:700;text-decoration:none;';
-          ml.textContent='Map';actions.appendChild(ml);
-        }
-        // Giao xong btn
-        var btn=document.createElement('button');
-        btn.style.cssText='padding:6px 10px;border-radius:7px;border:none;font-family:sans-serif;font-size:10px;font-weight:700;cursor:pointer;background:'+(isDone?'var(--mu)':isFail?'var(--reb)':'var(--gr)')+';color:'+(isFail?'var(--re)':'#fff')+';';
-        btn.textContent=isDone?'✔ Xong':isFail?'✖ K.giao':'○ Giao';
-        btn.onclick=(function(stk){return function(){kanbanCycleStatus(stk);};})(k);
-        actions.appendChild(btn);
-
-        row.appendChild(num);row.appendChild(info);row.appendChild(tag);row.appendChild(actions);
-        list.appendChild(row);
-      });
+      keys.forEach(function(k,si){renderQuanRow(list,k,storeMap[k],si,color);});
       block.appendChild(list);
       el.appendChild(block);
     });
   } else {
     stores.forEach(function(k,i){renderCard(el,k,storeMap[k],i+1);});
   }
+}
+
+// Render 1 row trong mode "Sort theo Quan"
+function renderQuanRow(list, k, s, si, color){
+  var st=getStatus(k);
+  var isDone=st==='done';
+  var isFail=st==='fail';
+  var isUrgent=s.prods.some(function(p){return p.lyDo==='date';});
+  var isOrder=s.prods.some(function(p){return p.lyDo==='order';});
+  var isGap=!isDone&&s.prods.some(function(p){
+    var m=String(p.ghiChuSP||'').match(/con\s*(\d+)n/i);
+    return p.lyDo==='date'&&m&&parseInt(m[1])<=2;
+  });
+  var hasThuNo=s.prods.some(function(p){return p.thuNo>0;});
+  var totalNo=s.prods.reduce(function(acc,p){return acc+(parseFloat(p.thuNo)||0);},0);
+
+  var prodTxt=s.prods.map(function(p){
+    var note=String(p.ghiChuSP||'');
+    return (p.name||p.sanPham||'')+(note?' ('+note+')':'');
+  }).filter(Boolean).join(' . ');
+
+  var row=document.createElement('div');
+  row.style.cssText='display:flex;align-items:center;gap:9px;padding:10px 13px;border-top:.5px solid var(--bd);'+(isDone?'opacity:.45;':'');
+
+  var num=document.createElement('div');
+  num.style.cssText='width:24px;height:24px;border-radius:50%;background:'+(isDone?'#888':color)+';color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
+  num.textContent=isDone?'\u2713':(si+1);
+
+  var info=document.createElement('div');
+  info.style.cssText='flex:1;min-width:0;cursor:pointer;';
+  info.onclick=(function(sk){return function(){openCrm(sk);};})(k);
+  var rowIco='';
+  if(!isDone){
+    if(isGap) rowIco='<span class="urg-ico" style="font-size:13px;margin-right:3px;">\u{1F6A8}</span>';
+    else if(isOrder) rowIco='<span class="urg-ico" style="font-size:12px;margin-right:3px;">\u23F0</span>';
+  }
+  info.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+rowIco+esc(s.tenCH)+' <span style="font-size:10px;color:var(--bl);">&#9432;</span></div>'+
+    (prodTxt?'<div style="font-size:10px;color:var(--mu);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(prodTxt)+'</div>':'')+
+    (hasThuNo?'<div style="font-size:10px;font-weight:700;color:var(--re);margin-top:2px;">Thu no: '+Number(totalNo).toLocaleString('vi-VN')+'d</div>':'');
+
+  var tag=document.createElement('span');
+  var tagBg=isDone?'var(--bg)':isFail?'var(--reb)':isUrgent?'var(--reb)':isOrder?'#dbeafe':'var(--amb)';
+  var tagColor=isDone?'var(--mu)':isFail?'var(--re)':isUrgent?'var(--re)':isOrder?'#1e40af':'var(--am)';
+  tag.style.cssText='font-size:9px;font-weight:700;padding:3px 8px;border-radius:8px;flex-shrink:0;background:'+tagBg+';color:'+tagColor+';';
+  tag.textContent=isDone?'Xong':isFail?'K.giao':isUrgent?'Gap!':isOrder?'Don':'Sap';
+
+  var actions=document.createElement('div');
+  actions.style.cssText='display:flex;gap:5px;align-items:center;flex-shrink:0;';
+  if(s.mapUrl){
+    var ml=document.createElement('a');ml.href=s.mapUrl;ml.target='_blank';
+    ml.style.cssText='padding:5px 8px;border-radius:7px;background:var(--blb);color:var(--bl);font-size:10px;font-weight:700;text-decoration:none;';
+    ml.textContent='Map';actions.appendChild(ml);
+  }
+  var btn=document.createElement('button');
+  btn.style.cssText='padding:6px 10px;border-radius:7px;border:none;font-family:sans-serif;font-size:10px;font-weight:700;cursor:pointer;background:'+(isDone?'var(--mu)':isFail?'var(--reb)':'var(--gr)')+';color:'+(isFail?'var(--re)':'#fff')+';';
+  btn.textContent=isDone?'\u2714 Xong':isFail?'\u2716 K.giao':'\u25cb Giao';
+  btn.onclick=(function(stk){return function(){kanbanCycleStatus(stk);};})(k);
+  actions.appendChild(btn);
+
+  row.appendChild(num);row.appendChild(info);row.appendChild(tag);row.appendChild(actions);
+  list.appendChild(row);
 }
 
 function updateAllProgress(){
@@ -1192,10 +1308,15 @@ function renderCard(container, key, store, idx, accentColor){
   // Quan
   var quan=store.quan||'';
 
+  // Icon canh bao nhap nhay cho don gap/hen
+  var urgentIco='';
+  if(isGapCard) urgentIco='<span class="urg-ico" title="Don GAP - uu tien">&#128680;</span>';
+  else if(isOrderCard) urgentIco='<span class="urg-ico" title="Don co hen">&#9200;</span>';
+
   card.innerHTML=
     '<div class="dl-hd">'+
       '<div class="dl-num'+(isDone?' done':'')+'">'+idx+'</div>'+
-      '<div style="flex:1;cursor:pointer;" onclick="openCrm(\''+esc(store.tenCH).replace(/'/g,"\\'")+'\')"><div class="dl-store">'+esc(store.tenCH)+' <span style="font-size:11px;color:var(--bl);font-weight:600;">&#9432;</span></div></div>'+
+      '<div style="flex:1;cursor:pointer;" onclick="openCrm(\''+esc(store.tenCH).replace(/'/g,"\\'")+'\')"><div class="dl-store">'+urgentIco+esc(store.tenCH)+' <span style="font-size:11px;color:var(--bl);font-weight:600;">&#9432;</span></div></div>'+
       (store.mapUrl?'<a href="'+store.mapUrl+'" target="_blank" class="map-link">&#128207; Ban do</a>':'')+
     '</div>'+
     '<div class="dl-body">'+prodsHtml+'</div>';
