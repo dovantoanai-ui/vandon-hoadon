@@ -555,6 +555,8 @@ select.hd-finp{appearance:none;-webkit-appearance:none;background:transparent;cu
     <div class="stat-box"><div class="stat-n" id="sDone" style="color:var(--bl);">0</div><div class="stat-l">Da giao</div></div>
     <div class="stat-box"><div class="stat-n" id="sRemain" style="color:var(--or);">0</div><div class="stat-l">Con lai</div></div>
   </div>
+  <!-- Banner nhac quay lai CH da hoan -->
+  <div id="hoanReminderBanner" style="display:none;"></div>
   <div class="fbar">
     <button class="ftab on" id="fAll" onclick="setFilter('all')">Tat ca</button>
     <button class="ftab" id="fTodo" onclick="setFilter('todo')">Chua giao</button>
@@ -1338,7 +1340,88 @@ function _timeLeftText(hhmm){
   }
 }
 
+// Tinh so ngay giua 2 ngay dang "YYYY-MM-DD" (b - a)
+function _daysBetween(a,b){
+  var pa=a.split('-'),pb=b.split('-');
+  var da=new Date(parseInt(pa[0]),parseInt(pa[1])-1,parseInt(pa[2]));
+  var db=new Date(parseInt(pb[0]),parseInt(pb[1])-1,parseInt(pb[2]));
+  return Math.round((db-da)/86400000);
+}
+
+// Render banner nhac quay lai CH da hoan
+// (TAT - chuyen sang PA2: tu sinh don - dung injectHoanToDeliveries)
+function renderHoanReminder(){
+  var el=document.getElementById('hoanReminderBanner');
+  if(el){el.style.display='none';el.innerHTML='';}
+}
+
+// Inject cac record hoan den han/qua han vao danh sach van don nhu mot don moi
+// Goi sau khi co deliveries tu Sheet
+function injectHoanToDeliveries(){
+  if(!deliveries||!deliveries.length)return;
+  var today=todayStr();
+  var hoanList=ld('gh_hoan_list',[]);
+  if(!hoanList.length)return;
+
+  // Cac CH da co trong van don hom nay (khong them don phu)
+  var existingKeys={};
+  deliveries.forEach(function(r){
+    var k=(r.tenCH||r.stt||'').toString().toLowerCase().trim();
+    if(k)existingKeys[k]=true;
+  });
+
+  // Loc record can check lai
+  var addedCount=0;
+  hoanList.forEach(function(r){
+    // Chi xet cac record den han/qua han
+    var days=_daysBetween(today,r.dateBack);
+    if(days>0)return; // chua den han
+
+    // Neu CH da co trong van don hom nay -> skip (tranh trung)
+    var kNorm=(r.tenCH||r.key||'').toString().toLowerCase().trim();
+    if(!kNorm||existingKeys[kNorm])return;
+
+    // Neu CH da xu ly trong hom nay (done/fail) -> skip
+    var st=statusMap[r.key||r.tenCH];
+    if(st==='done'||st==='fail')return;
+
+    // Tao don moi inject vao deliveries
+    var checkStatus=days<0?'Qua '+Math.abs(days)+' ngay':'Hom nay';
+    var injectedRow={
+      stt:9000+addedCount,   // STT lon de ko dung trung
+      tenCH:r.tenCH,
+      sanPham:'Kiem hang con lai',
+      soLuong:r.slTon||0,
+      ghiChuSP:'Hoan '+fmtD(r.dateHoan)+' - con '+(r.slTon||0)+' ('+checkStatus+')',
+      lyDo:'hoan_check',
+      thuNo:0,
+      ghiChuCH:r.note||'',
+      mapUrl:'',
+      trangThai:'Chua giao',
+      ngay:today,
+      quan:'',
+      nguonDon:'hoan_auto',
+      loaiGiao:'normal',
+      thoiGianHen:'',
+      slGiao:'',
+      _hoanId:r.id, // de link nguoc ve record
+      _hoanDaysLeft:days,
+      _hoanImg:r.img||''
+    };
+    deliveries.push(injectedRow);
+    existingKeys[kNorm]=true;
+    addedCount++;
+  });
+
+  if(addedCount>0){
+    sv('gh_data_'+today,deliveries);
+    console.log('[HOAN] Injected '+addedCount+' don kiem lai');
+  }
+}
+
 function renderVdList(){
+  // Inject cac don hoan den han/qua han vao deliveries (PA2 - tu sinh don)
+  injectHoanToDeliveries();
   // Group by store (moi cua hang 1 card, nhieu san pham)
   var storeMap = {};
   deliveries.forEach(function(r){
@@ -1359,8 +1442,19 @@ function renderVdList(){
         ghiChuCH: r.ghiChuCH||'',
         gioDay: (isHen&&gioHen)?gioHen:'',
         slGiao: slGiaoRaw,
+        isHoanCheck: r.lyDo==='hoan_check',
+        hoanId: r._hoanId||'',
+        hoanDaysLeft: typeof r._hoanDaysLeft==='number'?r._hoanDaysLeft:null,
+        hoanImg: r._hoanImg||'',
         prods: []
       };
+    }
+    // Flag hoan_check neu bat ky row nao la hoan_check
+    if(r.lyDo==='hoan_check'){
+      storeMap[key].isHoanCheck=true;
+      if(r._hoanId)storeMap[key].hoanId=r._hoanId;
+      if(typeof r._hoanDaysLeft==='number')storeMap[key].hoanDaysLeft=r._hoanDaysLeft;
+      if(r._hoanImg)storeMap[key].hoanImg=r._hoanImg;
     }
     // Neu chua co gioDay truoc do thi lay tu row nay
     if(!storeMap[key].gioDay&&isHen&&gioHen){
@@ -1449,8 +1543,11 @@ function renderVdList(){
 
   // Group by quan - single column, moi quan 1 block doc
   if(curSort==='quan'){
-    // Tach DON HEN GIO (co gio) va DON DAT (order khong hen gio) thanh 2 block rieng
+    // Tach DON HOAN CHECK (quay lai kiem) - uu tien cao nhat
+    // DON HEN GIO (co gio) - uu tien thu 2
+    // DON DAT (order khong hen gio) - uu tien thu 3
     // Don GAP (con 0-2n) se nam trong quan va len dau quan
+    var hoanKeys=[];
     var henGioKeys=[];
     var donDatKeys=[];
     var otherKeys=[];
@@ -1458,9 +1555,10 @@ function renderVdList(){
       var s=storeMap[k];
       var isDone=getStatus(k)==='done';
       if(isDone){otherKeys.push(k);return;}
+      if(s.isHoanCheck){hoanKeys.push(k);return;}   // Kiem lai uu tien nhat
       var hasHenGio=!!s.gioDay;
       var hasOrder=s.prods.some(function(p){return p.lyDo==='order';});
-      if(hasHenGio)henGioKeys.push(k);      // Hen gio uu tien cao nhat
+      if(hasHenGio)henGioKeys.push(k);      // Hen gio uu tien cao
       else if(hasOrder)donDatKeys.push(k);  // Don dat thuong
       else otherKeys.push(k);
     });
@@ -1489,6 +1587,26 @@ function renderVdList(){
       prog.innerHTML='<div style="height:100%;width:'+pct+'%;background:'+color+';transition:width .4s;"></div>';
       block.appendChild(prog);
       return block;
+    }
+
+    // Render block KIEM LAI (hoan) TRUOC tien - uu tien cao nhat (cam dam co pulse)
+    if(hoanKeys.length){
+      // Sort: qua han nhieu nhat len dau
+      hoanKeys.sort(function(a,b){
+        var da=storeMap[a].hoanDaysLeft, db=storeMap[b].hoanDaysLeft;
+        if(typeof da==='number'&&typeof db==='number')return da-db;
+        return 0;
+      });
+      // Dem qua han
+      var qhanCnt=hoanKeys.filter(function(k){return storeMap[k].hoanDaysLeft<0;}).length;
+      var hoanColor='#dc2626';
+      var subTxt=qhanCnt>0?(qhanCnt+' CH QUA HAN - phai quay lai ngay!'):'Den han - can check hang';
+      var hoanBlock=createBlock('KIEM LAI - Tu don hoan',hoanColor,hoanKeys,true,subTxt);
+      var hoanListEl=document.createElement('div');
+      hoanListEl.style.cssText='background:var(--sf);';
+      hoanKeys.forEach(function(k,si){renderQuanRow(hoanListEl,k,storeMap[k],si,hoanColor);});
+      hoanBlock.appendChild(hoanListEl);
+      el.appendChild(hoanBlock);
     }
 
     // Render block HEN GIO truoc (uu tien cao nhat - mau do)
@@ -1578,6 +1696,8 @@ function renderVdList(){
   } else {
     stores.forEach(function(k,i){renderCard(el,k,storeMap[k],i+1);});
   }
+  // Render banner nhac quay lai CH da hoan
+  renderHoanReminder();
 }
 
 // Render 1 row trong mode "Sort theo Quan"
@@ -1617,11 +1737,25 @@ function renderQuanRow(list, k, s, si, color){
   info.onclick=(function(sk){return function(){openCrm(sk);};})(k);
   var rowIco='';
   if(!isDone){
-    if(s.gioDay) rowIco='<span class="urg-ico" style="font-size:12px;margin-right:3px;">\u23F0</span>';
+    if(s.isHoanCheck) rowIco='<span class="urg-ico" style="font-size:13px;margin-right:3px;">\u{1F501}</span>'; // 🔁
+    else if(s.gioDay) rowIco='<span class="urg-ico" style="font-size:12px;margin-right:3px;">\u23F0</span>';
     else if(isGap) rowIco='<span class="urg-ico" style="font-size:13px;margin-right:3px;">\u{1F6A8}</span>';
     else if(isOrder) rowIco='<span class="urg-ico" style="font-size:12px;margin-right:3px;">\u{1F4CC}</span>';
   }
   var gioHtml=(s.gioDay&&!isDone)?' <span style="font-size:10px;color:#d97706;font-weight:800;background:#fef3c7;padding:1px 5px;border-radius:5px;">&#9200; '+esc(s.gioDay)+'</span>':'';
+
+  // Badge HOAN CHECK (kiem lai tu don hoan)
+  var hoanBadge='';
+  if(s.isHoanCheck&&!isDone){
+    var daysLeft=s.hoanDaysLeft;
+    if(typeof daysLeft==='number'){
+      if(daysLeft<0){
+        hoanBadge=' <span style="font-size:10px;color:#fff;font-weight:800;background:#dc2626;padding:1px 6px;border-radius:5px;">QUA '+Math.abs(daysLeft)+'N</span>';
+      } else {
+        hoanBadge=' <span style="font-size:10px;color:#fff;font-weight:800;background:#d97706;padding:1px 6px;border-radius:5px;">HOM NAY</span>';
+      }
+    }
+  }
 
   // Badge gioi han SL giao (chi hien badge canh ten)
   var slHtml='';
@@ -1638,7 +1772,7 @@ function renderQuanRow(list, k, s, si, color){
     }
   }
 
-  info.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+rowIco+esc(s.tenCH)+gioHtml+slHtml+' <span style="font-size:10px;color:var(--bl);">&#9432;</span></div>'+
+  info.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+rowIco+esc(s.tenCH)+gioHtml+hoanBadge+slHtml+' <span style="font-size:10px;color:var(--bl);">&#9432;</span></div>'+
     (prodTxt?'<div style="font-size:10px;color:var(--mu);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(prodTxt)+'</div>':'')+
     (hasThuNo?'<div style="font-size:10px;font-weight:700;color:var(--re);margin-top:2px;">Thu no: '+Number(totalNo).toLocaleString('vi-VN')+'d</div>':'');
 
@@ -1650,13 +1784,22 @@ function renderQuanRow(list, k, s, si, color){
 
   var actions=document.createElement('div');
   actions.style.cssText='display:flex;gap:5px;align-items:center;flex-shrink:0;';
+  // Neu la don kiem lai (hoan_check): them nut xem anh cu
+  if(s.isHoanCheck&&s.hoanImg){
+    var btnImg=document.createElement('button');
+    btnImg.style.cssText='padding:5px 7px;border-radius:7px;border:none;background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;cursor:pointer;';
+    btnImg.innerHTML='&#128247;';
+    btnImg.title='Xem anh ke hang luc hoan';
+    btnImg.onclick=(function(hid){return function(e){e.stopPropagation();viewHoanImg(hid);};})(s.hoanId);
+    actions.appendChild(btnImg);
+  }
   if(s.mapUrl){
     var ml=document.createElement('a');ml.href=s.mapUrl;ml.target='_blank';
     ml.style.cssText='padding:5px 8px;border-radius:7px;background:var(--blb);color:var(--bl);font-size:10px;font-weight:700;text-decoration:none;';
     ml.textContent='Map';actions.appendChild(ml);
   }
-  // Nut HOAN rieng - chi hien khi CH chua giao/khong phai hoan
-  if(!isDone&&!isHoan&&!isFail){
+  // Nut HOAN rieng - chi hien khi CH chua giao/khong phai hoan va KHONG PHAI don kiem lai
+  if(!isDone&&!isHoan&&!isFail&&!s.isHoanCheck){
     var btnHoan=document.createElement('button');
     btnHoan.style.cssText='padding:6px 8px;border-radius:7px;border:none;font-family:sans-serif;font-size:10px;font-weight:700;cursor:pointer;background:#fef3c7;color:#92400e;';
     btnHoan.innerHTML='\u23F8';
@@ -2058,6 +2201,12 @@ function getMapColor(t){return {depot:'#1a6b35',order:'#1976d2',gap:'#dc2626',sa
 window.onload=function(){
   document.getElementById('setUrl').value=GS_URL||'';
   document.getElementById('setNV').value=MY_NAME||'';
+  // Reset dismissed list moi ngay (sang hom sau lai nhac lai neu chua xu ly)
+  var lastDismissDate=ld('gh_hoan_dismiss_date','');
+  if(lastDismissDate!==todayStr()){
+    sv('gh_hoan_dismissed',{});
+    sv('gh_hoan_dismiss_date',todayStr());
+  }
   // Goi banner neu co data san trong localStorage
   if(deliveries.length){
     updateStats();
