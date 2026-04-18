@@ -1064,6 +1064,140 @@ try {
   }
 } catch(e) {}
 
+// ============================================================
+// v2.8: Kiem ton kho - modal bat sau khi NV bam "Giao"
+// NV nhap so luong ton cua cac SP CH da tung giao → push Sheet TonKho
+// ============================================================
+var tkCurKey = null;
+var tkCurStore = null;
+
+// Queue retry khi push fail (mat mang)
+function tkQueueGet(){
+  try{return JSON.parse(localStorage.getItem('gh_tk_queue')||'[]');}
+  catch(e){return [];}
+}
+function tkQueueSet(q){
+  try{localStorage.setItem('gh_tk_queue',JSON.stringify(q));}catch(e){}
+}
+function tkQueueAdd(items){
+  var q=tkQueueGet();q.push({items:items,t:Date.now()});tkQueueSet(q);
+}
+function tkRetryQueue(){
+  var q=tkQueueGet();if(!q.length||!GS_URL)return;
+  var pending=q.slice();
+  tkQueueSet([]);
+  pending.forEach(function(entry){
+    fetch(GS_URL,{method:'POST',mode:'cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({loai:'tonkho',items:entry.items})})
+    .then(function(r){return r.json();})
+    .then(function(d){if(!d.ok){var q2=tkQueueGet();q2.push(entry);tkQueueSet(q2);}})
+    .catch(function(){var q2=tkQueueGet();q2.push(entry);tkQueueSet(q2);});
+  });
+}
+
+// Detect don vi SP
+function tkDonVi(sp){
+  var s=String(sp||'').toLowerCase();
+  if(s.indexOf('mam')>=0||s.indexOf('nuoc mam')>=0||s.indexOf('mắm')>=0||s.indexOf('nước mắm')>=0)return 'chai';
+  return 'goi';
+}
+
+// Mo modal ton kho sau khi giao
+function openTkModal(key, store){
+  if(!store)return;
+  tkCurKey=key;
+  tkCurStore=store;
+  document.getElementById('tkSub').textContent=(store.tenCH||'')+' . '+fmtD(new Date());
+  var listEl=document.getElementById('tkList');
+  var tenCH=store.tenCH||'';
+  var chProds=(chProductsCache&&chProductsCache[tenCH])||[];
+  if(!chProds.length){
+    listEl.innerHTML='<div style="padding:20px;text-align:center;color:#888;font-size:12px;">'+
+      'Khong co SP da giao tai CH nay (chua load cache). Dong modal va thu lai sau.</div>';
+    document.getElementById('tkSaveBtn').style.display='none';
+  } else {
+    // Sort: SP dang giao (GAP hoac Date) len dau, con lai sort theo so ngay giam dan
+    var inOrder={};
+    (store.prods||[]).forEach(function(p){inOrder[p.name||p.sanPham]=true;});
+    chProds.sort(function(a,b){
+      var ao=inOrder[a.sp]?0:1,bo=inOrder[b.sp]?0:1;
+      if(ao!==bo)return ao-bo;
+      return b.soNgay-a.soNgay;
+    });
+    var html='<div style="padding:8px 16px 4px;font-size:11px;color:#888;font-weight:600;">'+
+      'SP CH da tung giao ('+chProds.length+')</div>';
+    chProds.forEach(function(p){
+      var isGap=p.soNgay>=(p.ngDo||9999);
+      var isAmb=!isGap&&p.soNgay>=(p.ngVang||9999);
+      var inDon=inOrder[p.sp];
+      var bg=isGap?'#FCEBEB':isAmb?'#FAEEDA':'#fff';
+      var stCol=isGap?'#A32D2D':isAmb?'#854F0B':'#888';
+      var stTxt=(isGap?'GAP . ':isAmb?'Can giao . ':'')+'da qua '+p.soNgay+'n';
+      var inpId='tk_inp_'+String(p.sp).replace(/[^a-z0-9]/gi,'_');
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:.5px solid #eee;background:'+bg+';">'+
+        '<div style="flex:1;min-width:0;">'+
+          '<div style="font-size:13px;font-weight:600;">'+esc(p.sp)+(inDon?' <span style="font-size:9px;color:#0F6E56;font-weight:700;background:#d1fae5;padding:1px 5px;border-radius:3px;">DANG GIAO</span>':'')+'</div>'+
+          '<div style="font-size:10px;color:'+stCol+';margin-top:2px;">'+stTxt+'</div>'+
+        '</div>'+
+        '<input type="number" inputmode="numeric" id="'+inpId+'" data-sp="'+esc(p.sp)+'" placeholder="-" oninput="tkUpdateCount()" style="width:60px;text-align:center;padding:6px 8px;font-size:13px;font-weight:600;border:1px solid #ccc;border-radius:6px;">'+
+        '<span style="font-size:11px;color:#888;min-width:25px;">'+tkDonVi(p.sp)+'</span>'+
+        '</div>';
+    });
+    listEl.innerHTML=html;
+    document.getElementById('tkSaveBtn').style.display='';
+    tkUpdateCount();
+  }
+  document.getElementById('tkModal').style.display='flex';
+}
+
+function closeTkModal(){
+  document.getElementById('tkModal').style.display='none';
+  tkCurKey=null;tkCurStore=null;
+}
+
+function tkUpdateCount(){
+  var inputs=document.querySelectorAll('#tkList input[type="number"]');
+  var count=0;
+  inputs.forEach(function(inp){
+    var v=inp.value;
+    if(v!==''&&v!==null&&!isNaN(parseFloat(v)))count++;
+  });
+  var btn=document.getElementById('tkSaveBtn');
+  btn.textContent=count>0?'Luu ('+count+' SP)':'Luu';
+  btn.style.opacity=count>0?'1':'0.5';
+}
+
+function submitTonKho(){
+  if(!tkCurStore){closeTkModal();return;}
+  var inputs=document.querySelectorAll('#tkList input[type="number"]');
+  var items=[];
+  inputs.forEach(function(inp){
+    var v=inp.value;
+    if(v===''||v===null||isNaN(parseFloat(v)))return;
+    items.push({
+      tenCH:tkCurStore.tenCH||'',
+      nv:MY_NAME||'',
+      sanPham:inp.dataset.sp||'',
+      soLuong:parseFloat(v),
+      stt:tkCurStore.stt||''
+    });
+  });
+  if(!items.length){closeTkModal();return;}
+
+  // Dong modal ngay, push nen
+  closeTkModal();
+  toast('Da luu '+items.length+' ton kho');
+
+  if(!GS_URL){tkQueueAdd(items);return;}
+  fetch(GS_URL,{method:'POST',mode:'cors',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({loai:'tonkho',items:items})})
+  .then(function(r){return r.json();})
+  .then(function(d){if(!d.ok)tkQueueAdd(items);})
+  .catch(function(){tkQueueAdd(items);});
+}
+
 function pullCHProducts(){
   if(!GS_URL) return;
   fetch(GS_URL+'?loai=ch_products&action=get', {method:'GET',mode:'cors'})
@@ -1253,6 +1387,8 @@ if(!GS_URL || !MY_NAME){
   if(GS_URL_CRM) pullCrm();
   // v2.7: Pull CH products neu chua co cache hom nay
   if(!chProductsCache && GS_URL) pullCHProducts();
+  // v2.8: Retry ton kho queue neu co entry chua push duoc
+  if(typeof tkRetryQueue==='function') tkRetryQueue();
 }
 // Init HD date
 hdCurDate = todayStr();
@@ -2120,6 +2256,22 @@ function _applyStatusChange(key, next){
   pushStatus(key, next);
   if(next==='done'){
     showDeliveryToast(key,'done');
+    // v2.8: Bat modal ton kho sau khi giao
+    try{
+      // Tim SP dang giao cua CH nay trong deliveries
+      var prods=[];
+      var sttVal='';
+      for(var i=0;i<deliveries.length;i++){
+        var d=deliveries[i];
+        var dTen=d.tenCH||d.ten_ch||'';
+        if(dTen===key){
+          prods.push({name:d.sanPham||d.san_pham||'',lyDo:d.lyDo||d.loai_giao||'date'});
+          if(!sttVal)sttVal=d.stt||'';
+        }
+      }
+      var stk={tenCH:key,stt:sttVal,prods:prods};
+      setTimeout(function(){openTkModal(key,stk);},600);
+    }catch(e){}
   } else if(next==='fail'){
     showDeliveryToast(key,'fail');
   }
@@ -4727,5 +4879,26 @@ goTab=function(tab){
 // Render ngay khi load app
 setTimeout(function(){renderHdCatalog();},100);
 </script>
+<!-- v2.8: Modal Kiem Ton Kho -->
+<div id="tkModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:420px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:14px 16px;background:#1A6B35;color:#fff;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:14px;font-weight:700;">Kiem ton kho</div>
+        <div id="tkSub" style="font-size:11px;opacity:0.85;margin-top:2px;"></div>
+      </div>
+      <button onclick="closeTkModal()" style="background:transparent;border:1px solid rgba(255,255,255,0.4);color:#fff;padding:4px 10px;font-size:14px;border-radius:6px;cursor:pointer;">&times;</button>
+    </div>
+    <div style="padding:10px 16px;background:#FAEEDA;font-size:11px;color:#633806;line-height:1.5;">
+      <strong>Tuy chon:</strong> Chi nhap SP muon ghi nhan, bo trong SP khac. Co the bam "Bo qua" neu khong kiem ton.
+    </div>
+    <div id="tkList" style="flex:1;overflow-y:auto;max-height:50vh;"></div>
+    <div style="padding:12px 16px;background:#f5f5f5;border-top:0.5px solid #e5e5e5;display:flex;gap:8px;">
+      <button onclick="closeTkModal()" style="flex:1;padding:10px;font-size:13px;font-weight:600;background:#fff;border:0.5px solid #ccc;border-radius:8px;cursor:pointer;">Bo qua</button>
+      <button id="tkSaveBtn" onclick="submitTonKho()" style="flex:2;padding:10px;font-size:13px;font-weight:700;background:#1A6B35;color:#fff;border:none;border-radius:8px;cursor:pointer;">Luu</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
