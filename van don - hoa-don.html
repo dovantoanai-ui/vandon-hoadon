@@ -1050,12 +1050,119 @@ function fmtD(s){if(!s)return '';var p=(s+'').split('-');return p[2]+'/'+p[1]+'/
 // Rut gon ghi chu SP: bo chu "Thay date" va dau ngoac thua, chi giu phan "(con Nn)"
 // "Thay date (con 2n)" -> "con 2n"
 // "Thay date 01/05/2026" -> "01/05/2026"
+// v2.6 helper: Detect gap uu tien field loaiGiao (tu trigger Apps Script)
+// Fallback: check ghiChuSP co "GAP" khong (text moi tu v2.6)
+// Fallback cu: regex "con Xn" <= 2 (tuong thich data cu)
+// v2.7: Cache SP cua tung CH (tu sheet VanDon source) 
+// De hien "CH co: ..." cac SP sap toi nguong Vang
+var chProductsCache = null;
+try {
+  var cached = localStorage.getItem('gh_ch_products');
+  var cachedDay = localStorage.getItem('gh_ch_products_day');
+  if (cached && cachedDay === todayStr()) {
+    chProductsCache = JSON.parse(cached);
+  }
+} catch(e) {}
+
+function pullCHProducts(){
+  if(!GS_URL) return;
+  fetch(GS_URL+'?loai=ch_products&action=get', {method:'GET',mode:'cors'})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.ok && data.stores){
+      chProductsCache = data.stores;
+      try{
+        localStorage.setItem('gh_ch_products', JSON.stringify(data.stores));
+        localStorage.setItem('gh_ch_products_day', todayStr());
+      }catch(e){}
+      if(typeof renderVdList === 'function') renderVdList();
+    }
+  })
+  .catch(function(){});
+}
+
+// Lay danh sach SP sap toi nguong Vang cua 1 CH (de hien "CH co")
+// Return [{sp, hsdConLai, level: 'near'|'over'}]
+function getCHNearThresh(tenCH){
+  if(!chProductsCache || !chProductsCache[tenCH]) return [];
+  var prods = chProductsCache[tenCH];
+  var result = [];
+  prods.forEach(function(p){
+    // Chi hien SP sap toi nguong Vang (v-5 <= soNgay < v)
+    // SP >= Vang (da len don) hoac < Vang-5 (con xa) thi an
+    if (p.soNgay >= p.ngVang - 5 && p.soNgay < p.ngVang) {
+      result.push({
+        sp: p.sp,
+        hsdConLai: (p.hsd || 60) - p.soNgay,
+        level: 'near'
+      });
+    }
+  });
+  return result;
+}
+
+// Viet tat ten SP
+function abbrevSP(sp){
+  var map = {
+    'Nem chua':'Nem C',
+    'Nem Thinh':'Nem T',
+    'Nem Tom':'Nem Tom',
+    'Ha cao tom':'Ha cao',
+    'Banh bao kim sa':'Banh KS',
+    'Banh bao xa xiu':'Banh XX',
+    'Banh bao Maylayxia':'Banh MLX',
+    'Mo heo thao duoc':'Mo heo',
+    'Vit co lung':'Vit',
+    'Nuoc mam 36N':'NM36',
+    'Nuoc mam 31N':'NM31',
+    'Nuoc mam 29N':'NM29',
+    'Nuoc mam 26N':'NM26',
+    'Nuoc mam 20N 1800ml':'NM20L',
+    'Nuoc mam 20N 1000ml':'NM20',
+    'Mam tom 500g':'MT500',
+    'Mam tom 250g':'MT250',
+    'Mam tom 120g':'MT120',
+    'Mam tep 500g':'MTep500',
+    'Mam tep 250g':'MTep250',
+    'Mam tep 120g':'MTep120'
+  };
+  return map[sp] || sp;
+}
+
+function isProdGap(p){
+  if(!p) return false;
+  // 1. Uu tien field loaiGiao tu Apps Script
+  if(String(p.loaiGiao||'').toLowerCase().trim()==='gap') return true;
+  // 2. Check text "GAP" trong ghi chu
+  if(/\bGAP\b/i.test(String(p.ghiChuSP||''))) return true;
+  // 3. Fallback cu: text "con Xn" <= 2 (data cu v2.4 tro ve truoc)
+  var m=String(p.ghiChuSP||'').match(/con\s*(\d+)\s*n/i);
+  if(m && p.lyDo==='date' && parseInt(m[1])<=2) return true;
+  return false;
+}
+
+// Lay HSD con tu ghi chu (dung de sort: HSD con it len tren)
+// Text moi: "GAP, HSD con 5n" hoac "HSD con 10n"
+function getHsdConLai(p){
+  if(!p) return 99;
+  var s=String(p.ghiChuSP||'');
+  // Text moi: "HSD con 5n"
+  var m=s.match(/HSD\s*con\s*(-?\d+)\s*n/i);
+  if(m) return parseInt(m[1]);
+  // Text cu: "con 5n" (ko co "HSD" phia truoc)
+  m=s.match(/con\s*(\d+)\s*n/i);
+  if(m) return parseInt(m[1]);
+  return 99;
+}
+
 function cleanNote(note){
   var s=String(note||'').trim();
   if(!s)return '';
-  // Bo "Thay date" o dau (case-insensitive)
+  // v2.6: Bo "GAP" va "GAP," o dau (gap flag da co badge rieng)
+  s=s.replace(/^\s*GAP\s*,?\s*/i,'').trim();
+  // Bo "Thay date" o dau (data cu)
   s=s.replace(/^\s*thay\s*date\s*/i,'').trim();
-  // Bo dau ngoac ngoai cung neu co: "(con 2n)" -> "con 2n"
+  // Bo dau ngoac ngoai cung: "(con 2n)" -> "con 2n"
   s=s.replace(/^\(\s*(.*?)\s*\)$/,'$1').trim();
   return s;
 }
@@ -1144,6 +1251,8 @@ if(!GS_URL || !MY_NAME){
   }
   // Pull CRM khi mo app
   if(GS_URL_CRM) pullCrm();
+  // v2.7: Pull CH products neu chua co cache hom nay
+  if(!chProductsCache && GS_URL) pullCHProducts();
 }
 // Init HD date
 hdCurDate = todayStr();
@@ -1485,25 +1594,30 @@ function renderVdList(){
     return true;
   });
 
-  // Tinh priority cho tung store (GAP = 0, ORDER = 1, binh thuong = 2)
-  // Priority cao hon (so nho hon) = hien len dau
+  // Tinh priority cho tung store
+  // 0 = Hoan check (quay lai kiem tra) - uu tien cao nhat
+  // 1 = HEN GIO (co gio cu the) - uu tien cao
+  // 2 = GAP (SP sap het date - co flag GAP)
+  // 3 = Don dat (khach order)
+  // 4 = Binh thuong (giao date)
   function getPriority(s){
+    if(s.isHoanCheck) return 0;
     var prods=s.prods||[];
-    var hasGap=prods.some(function(p){
-      var m=String(p.ghiChuSP||'').match(/con\s*(\d+)n/i);
-      return p.lyDo==='date'&&m&&parseInt(m[1])<=2;
-    });
+    // Check hen gio: co s.gioDay (gio hen cu the nhu "14:30")
+    if(s.gioDay) return 1;
+    // Check loaiGiao==='hen' o cap prod (backup)
+    var hasHen=prods.some(function(p){return String(p.loaiGiao||'').toLowerCase()==='hen';});
+    if(hasHen) return 1;
+    var hasGap=prods.some(isProdGap);
+    if(hasGap) return 2;
     var hasOrder=prods.some(function(p){return p.lyDo==='order';});
-    if(hasGap) return 0;
-    if(hasOrder) return 1;
-    return 2;
+    if(hasOrder) return 3;
+    return 4;
   }
 
   // SORT TONG HOP: theo thu tu uu tien
-  // 1. Da giao -> cuoi cung
-  // 2. Don GAP -> len dau tien (chua giao)
-  // 3. Don HEN -> len thu hai (chua giao)
-  // 4. Trong cung nhom priority thi sort theo quan/stt
+  // Da giao -> cuoi cung
+  // Chua giao: Hoan check -> Hen gio -> GAP -> Don dat -> Binh thuong
   stores.sort(function(a,b){
     var sa=storeMap[a],sb=storeMap[b];
     var isDoneA=getStatus(a)==='done',isDoneB=getStatus(b)==='done';
@@ -1660,15 +1774,19 @@ function renderVdList(){
       var keys=quanGroups[quan];
       // Sort trong quan:
       // 1. Chua giao len truoc, da giao xuong cuoi
-      // 2. Don gap (con 0-2n) len dau quan, ngay it hon len dau hon
+      // 2. Don GAP len dau quan, trong GAP thi HSD con it len tren
       // 3. Con lai sort theo stt
-      function getGapDays(k){
+      function isStoreGap(k){
+        var s=storeMap[k];
+        return s.prods.some(isProdGap);
+      }
+      function getMinHsdConLai(k){
         var s=storeMap[k];
         var min=99;
         s.prods.forEach(function(p){
           if(p.lyDo!=='date')return;
-          var m=String(p.ghiChuSP||'').match(/con\s*(\d+)n/i);
-          if(m){var d=parseInt(m[1]);if(d<min)min=d;}
+          var hsd=getHsdConLai(p);
+          if(hsd<min)min=hsd;
         });
         return min;
       }
@@ -1676,13 +1794,13 @@ function renderVdList(){
         var da_done=getStatus(a)==='done',db_done=getStatus(b)==='done';
         if(da_done&&!db_done)return 1;
         if(!da_done&&db_done)return -1;
-        // Ca 2 cung status - sort theo gap
-        var ga=getGapDays(a),gb=getGapDays(b);
-        var aGap=ga<=2,bGap=gb<=2;
-        if(aGap&&!bGap)return -1;
-        if(!aGap&&bGap)return 1;
-        if(aGap&&bGap)return ga-gb; // Con 0n len dau hon con 2n
-        // Khong gap - theo stt
+        // Ca 2 cung status - uu tien theo getPriority (Hen > GAP > Order > thuong)
+        var pa=getPriority(storeMap[a]),pb=getPriority(storeMap[b]);
+        if(pa!==pb)return pa-pb;
+        // Cung nhom uu tien - neu la GAP thi HSD con it hon len dau
+        var aGap=isStoreGap(a),bGap=isStoreGap(b);
+        if(aGap&&bGap)return getMinHsdConLai(a)-getMinHsdConLai(b);
+        // Cung nhom - theo stt
         return (storeMap[a].stt||0)-(storeMap[b].stt||0);
       });
       var block=createBlock(quan,color,keys,false);
@@ -1708,10 +1826,7 @@ function renderQuanRow(list, k, s, si, color){
   var isHoan=st==='hoan';
   var isUrgent=s.prods.some(function(p){return p.lyDo==='date';});
   var isOrder=s.prods.some(function(p){return p.lyDo==='order';});
-  var isGap=!isDone&&s.prods.some(function(p){
-    var m=String(p.ghiChuSP||'').match(/con\s*(\d+)n/i);
-    return p.lyDo==='date'&&m&&parseInt(m[1])<=2;
-  });
+  var isGap=!isDone&&s.prods.some(isProdGap);
   var hasThuNo=s.prods.some(function(p){return p.thuNo>0;});
   var totalNo=s.prods.reduce(function(acc,p){return acc+(parseFloat(p.thuNo)||0);},0);
 
@@ -1817,6 +1932,21 @@ function renderQuanRow(list, k, s, si, color){
 
   row.appendChild(num);row.appendChild(info);row.appendChild(tag);row.appendChild(actions);
   list.appendChild(row);
+
+  // v2.7: Dong "CH co: ..." - SP sap toi nguong Vang (chi hien khi CH con chua giao)
+  if(!isDone && !isHoan){
+    var chProds = getCHNearThresh(s.tenCH||k);
+    if(chProds.length){
+      var chRow = document.createElement('div');
+      chRow.style.cssText='padding:4px 13px 8px 43px;font-size:10.5px;line-height:1.5;color:var(--mu);background:'+(isFail?'transparent':'rgba(255,251,230,.4)')+';';
+      var html = '<span style="font-weight:700;">CH có:</span> ';
+      html += chProds.map(function(p){
+        return '<span style="color:#854F0B;font-weight:600;">'+esc(abbrevSP(p.sp))+': còn '+p.hsdConLai+'n</span>';
+      }).join(' · ');
+      chRow.innerHTML = html;
+      list.appendChild(chRow);
+    }
+  }
 }
 
 function updateAllProgress(){
@@ -1848,10 +1978,7 @@ function renderCard(container, key, store, idx, accentColor){
   var isUrgent = store.prods.some(function(p){return p.lyDo==='date';});
 
   var card=document.createElement('div');
-  var isGapCard=!isDone&&!isHoan&&store.prods.some(function(p){
-    var m2=String(p.ghiChuSP||'').match(/con\s*(\d+)n/i);
-    return p.lyDo==='date'&&m2&&parseInt(m2[1])<=2;
-  });
+  var isGapCard=!isDone&&!isHoan&&store.prods.some(isProdGap);
   var isOrderCard=!isDone&&!isHoan&&store.prods.some(function(p){return p.lyDo==='order';});
   card.className='dl-card '+(isDone?'done':isHoan?'hoan':isGapCard?'vd-urgent':isOrderCard?'vd-order':'');
   card.style.margin='0 14px 8px';
@@ -1859,10 +1986,16 @@ function renderCard(container, key, store, idx, accentColor){
 
   var prodsHtml='';
   store.prods.forEach(function(p){
-    var tagColor=p.lyDo==='date'?'background:var(--reb);color:var(--re);':'background:var(--grb);color:var(--gr);';
-    var tagTxt=p.lyDo==='date'?'Thay date':p.lyDo==='order'?'Don dat':'Co don';
-    var cleanedNote=cleanNote(p.ghiChuSP);
-    // Qty: chi hien khi >0. Don dat (order) - tô mau cam noi bat, Thay date - xanh la
+    var pIsGap=isProdGap(p);
+    var tagColor=pIsGap?'background:#dc2626;color:#fff;':p.lyDo==='date'?'background:var(--reb);color:var(--re);':'background:var(--grb);color:var(--gr);';
+    var tagTxt=pIsGap?'GAP':p.lyDo==='date'?'Date':p.lyDo==='order'?'Don dat':'Co don';
+    // v2.7: Format ngan: "Nem C: con 4n" (ten viet tat + HSD con lai)
+    var spShort = abbrevSP(p.name||p.sanPham||'');
+    var hsdConLai = getHsdConLai(p);
+    var spLine = spShort;
+    if (hsdConLai < 99) spLine += ': còn ' + hsdConLai + 'n';
+    var spColor = pIsGap ? 'color:#A32D2D;' : '';
+    // Qty: chi hien khi >0
     var qtyHtml='';
     if(p.qty&&parseFloat(p.qty)>0){
       var qtyColor=p.lyDo==='order'?'#d97706':'var(--gr)';
@@ -1871,9 +2004,7 @@ function renderCard(container, key, store, idx, accentColor){
     }
     prodsHtml+='<div class="prod-line">'+
       '<span class="prod-tag" style="'+tagColor+'">'+tagTxt+'</span>'+
-      '<div style="flex:1;"><div class="prod-nm">'+esc(p.name)+'</div>'+
-      (cleanedNote?'<div class="prod-nt">'+esc(cleanedNote)+'</div>':'')+
-      '</div>'+qtyHtml+'</div>';
+      '<div style="flex:1;"><div class="prod-nm" style="'+spColor+'font-weight:500;">'+esc(spLine)+'</div></div>'+qtyHtml+'</div>';
   });
 
   // Quan
@@ -1955,6 +2086,22 @@ function renderCard(container, key, store, idx, accentColor){
   ft.appendChild(statusBtn);
 
   card.appendChild(ft);
+
+  // v2.7: Dong "CH co: ..." cuoi card (SP sap toi nguong Vang)
+  if(!isDone && !isHoan){
+    var chProds = getCHNearThresh(store.tenCH||key);
+    if(chProds.length){
+      var chDiv = document.createElement('div');
+      chDiv.style.cssText='padding:6px 14px 10px;font-size:11px;line-height:1.6;color:var(--mu);border-top:.5px solid var(--bd);';
+      var html = '<span style="font-weight:700;">CH có:</span> ';
+      html += chProds.map(function(p){
+        return '<span style="color:#854F0B;font-weight:600;">'+esc(abbrevSP(p.sp))+': còn '+p.hsdConLai+'n</span>';
+      }).join(' · ');
+      chDiv.innerHTML = html;
+      card.appendChild(chDiv);
+    }
+  }
+
   container.appendChild(card);
 }
 
@@ -2188,10 +2335,9 @@ function getStopType(store,k){
   var rows=deliveries.filter(function(r){return (r.tenCH||r.stt)===k;});
   var hasOrder=rows.some(function(r){return r.lyDo==='order';});
   var hasDate=rows.some(function(r){return r.lyDo==='date';});
-  var minDays=99;
-  rows.forEach(function(r){var note=String(r.ghiChuSP||'');var m=note.match(/con\s*(\d+)n/i);if(m&&parseInt(m[1])<minDays)minDays=parseInt(m[1]);});
+  var hasGap=rows.some(isProdGap);
   if(hasOrder)return 'order';
-  if(hasDate&&minDays<=2)return 'gap';
+  if(hasDate&&hasGap)return 'gap';
   if(hasDate)return 'sap';
   return 'sap';
 }
@@ -2234,12 +2380,12 @@ function renderUrgentBanner(){
     if(!storeMap2[k])storeMap2[k]={tenCH:r.tenCH,prods:[],mapUrl:r.mapUrl||'',lyDo:r.lyDo||''};
     storeMap2[k].prods.push(r);
     if(r.lyDo==='date'){
-      // Parse so ngay tu ghiChuSP: "Thay date (con 2n)" -> 2
-      var note=String(r.ghiChuSP||r.note||'');
-      var m=note.match(/con\s*(\d+)n/i);
-      var days=m?parseInt(m[1]):99;
-      if(days<=2)gap.push(k);
-      else if(days<=5)storeMap2[k].isSoon=true;
+      // v2.6: dung isProdGap + HSD con lai
+      if(isProdGap(r)) gap.push(k);
+      else {
+        var hsdConLai=getHsdConLai(r);
+        if(hsdConLai<=7) storeMap2[k].isSoon=true;
+      }
     }
     if(r.lyDo==='order')hen.push(k);
   });
@@ -2408,7 +2554,7 @@ function computeSmartRoute(){
     allKeys.forEach(function(k,i){
       var s=stMap[k];
       var st=getStatus(k);
-      var isGap=!isDoneK(k)&&s.prods.some(function(r){var m2=String(r.ghiChuSP||'').match(/con\s*(\d+)n/i);return r.lyDo==='date'&&m2&&parseInt(m2[1])<=2;});
+      var isGap=!isDoneK(k)&&s.prods.some(isProdGap);
       var isOrder=!isDoneK(k)&&s.prods.some(function(r){return r.lyDo==='order';});
       var type=isDoneK(k)?'done':isGap?'gap':isOrder?'order':'sap';
       var baseColor={order:'#1976d2',gap:'#dc2626',sap:'#d97706',done:'#16a34a'}[type]||'#888';
@@ -2555,7 +2701,7 @@ function computeSmartRoute(){
     sec.style.cssText='margin:0 14px 6px;background:var(--sf);border-radius:9px;border:.5px solid '+color+'33;overflow:hidden;';
     keys.forEach(function(k,si){
       var s=stMap[k];var st=getStatus(k);var isDone=st==='done';
-      var isGap=!isDone&&s.prods.some(function(r){var m=String(r.ghiChuSP||'').match(/con\s*(\d+)n/i);return r.lyDo==='date'&&m&&parseInt(m[1])<=2;});
+      var isGap=!isDone&&s.prods.some(isProdGap);
       var isOrder=!isDone&&s.prods.some(function(r){return r.lyDo==='order';});
       var row=document.createElement('div');
       row.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 11px;border-top:.5px solid var(--bd);'+(isDone?'opacity:.45;':'');
